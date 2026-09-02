@@ -1,0 +1,4 @@
+cd "/Users/seoyoon/Desktop/FourpillarsApp/FourPillars.Backend"
+
+JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home \
+./mvnw spring-boot:run

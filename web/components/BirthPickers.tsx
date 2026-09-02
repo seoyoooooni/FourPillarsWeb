@@ -1,0 +1,11 @@
+"use client";
+import { useState } from "react";
+
+type Calendar = "SOLAR"|"LUNAR";
+export function BirthDateField({value,calendar,leap,onChange}:{value:string;calendar:Calendar;leap:boolean;onChange:(date:string,calendar:Calendar,leap:boolean)=>void}){
+  const [open,setOpen]=useState(false);const [draft,setDraft]=useState(value);const [mode,setMode]=useState(calendar==="SOLAR"?"solar":leap?"leap":"lunar");
+  return <><button type="button" className="picker-value" onClick={()=>{setDraft(value);setMode(calendar==="SOLAR"?"solar":leap?"leap":"lunar");setOpen(true)}}>{formatDate(value)}</button>{open&&<div className="picker-overlay" onClick={()=>setOpen(false)}><button type="button" className="picker-confirm" onClick={e=>{e.stopPropagation();onChange(draft,mode==="solar"?"SOLAR":"LUNAR",mode==="leap");setOpen(false)}}>✓</button><div className="picker-sheet" onClick={e=>e.stopPropagation()}><div className="calendar-wheel">{[["solar","양력"],["lunar","음력"],["leap","윤달"]].map(([key,label])=><button type="button" className={mode===key?"active":""} onClick={()=>setMode(key)} key={key}>{label}</button>)}</div><input className="wheel-date" type="date" value={draft} min={mode==="solar"?"1926-01-01":"1925-01-01"} max={mode==="solar"?"2027-12-31":"2027-12-04"} onChange={e=>setDraft(e.target.value)}/></div></div>}</>;
+}
+export function BirthTimeField({value,onChange}:{value:string;onChange:(time:string)=>void}){const [open,setOpen]=useState(false);const [draft,setDraft]=useState(value);return <><button type="button" className="picker-value" onClick={()=>{setDraft(value);setOpen(true)}}>{formatTime(value)}</button>{open&&<div className="picker-overlay" onClick={()=>setOpen(false)}><button type="button" className="picker-confirm" onClick={e=>{e.stopPropagation();onChange(draft);setOpen(false)}}>✓</button><div className="picker-sheet time-sheet" onClick={e=>e.stopPropagation()}><input className="wheel-time" type="time" value={draft} onChange={e=>setDraft(e.target.value)}/></div></div>}</>}
+function formatDate(value:string){const [y,m,d]=value.split("-").map(Number);return `${y}. ${m}. ${d}.`}
+function formatTime(value:string){const [h,m]=value.split(":").map(Number);return `${String(h%12||12).padStart(2,"0")}:${String(m).padStart(2,"0")} ${h<12?"AM":"PM"}`}

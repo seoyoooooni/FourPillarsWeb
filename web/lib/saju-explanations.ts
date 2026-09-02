@@ -1,0 +1,19 @@
+import type { Calculation } from "./api";
+
+export function explanationFor(label: string, result: Calculation) {
+  if (label === "십성") return "일간인 나와 각 천간·지지의 관계를 비견·식신·정재·정관·정인 등의 십성으로 나타낸 결과입니다.";
+  if (label === "지장간") return "각 지지 안에 포함된 천간을 여기·중기·정기로 나누어 표시합니다. 괄호 안에는 일간 기준 십성을 함께 표시합니다.";
+  if (label === "십이운성") return "각 기둥에서 일간의 기운이 시작·성장·성숙·쇠퇴하는 어느 단계에 놓이는지를 나타냅니다.";
+  if (label === "공망") return "기운이 비어 있거나 평소와 다르게 작용하기 쉬운 지지를 나타냅니다. 무조건 나쁜 의미로 보지는 않습니다.";
+  if (label.startsWith("십이신살")) return "지지 사이의 관계를 열두 가지 상징으로 분류한 보조 정보입니다. 원국 전체 해석보다 우선하지 않습니다.";
+  if (label === "용신 오행") return `전체 오행의 균형을 돕는 우선 요소로 ${result.yongsinAnalysis.yongsinElement}의 기운을 참고한다는 뜻입니다. 특정 색이나 행동을 강제하는 의미는 아닙니다.`;
+  if (label === "일간 강약") return `일간을 돕는 힘과 소모시키는 힘을 비교한 1차 결과입니다. 현재 계산값은 ${result.yongsinAnalysis.strength} ${result.yongsinAnalysis.strengthScore}점입니다.`;
+  if (label === "십성 범주") return "원국의 십성을 비겁·식상·재성·관성·인성 다섯 범주로 묶은 개수입니다. 월지는 계산에서 더 큰 비중을 둡니다.";
+  if (label === "신약 우선 기준" || label === "신강 우선 기준") return "일간이 약하거나 강할 때 어떤 십성 범주를 우선해 균형 요소를 선택할지 정한 계산 기준입니다.";
+  if (label === "판정 근거") return "용신이 선택된 계산 근거입니다. 현재는 일간의 강약을 중심으로 판단하는 억부법 기준을 사용합니다.";
+  if (label === "천덕 대응값") return "월지를 기준으로 천덕귀인의 성립 여부를 살필 때 사용하는 대응값입니다.";
+  if (label === "길신") return "전통적으로 도움이나 완충 작용을 상징하는 신살입니다. 실제 작용은 원국의 다른 관계와 함께 판단합니다.";
+  if (label === "주의해서 볼 신살") return "긴장이나 강한 움직임을 상징하는 신살입니다. 이름만으로 사건이나 불운을 단정하지 않습니다.";
+  if (label === "원진살") return "두 지지 사이에 미묘한 불편함이나 엇갈림이 생기기 쉬운 관계를 뜻하는 보조 지표입니다.";
+  return "";
+}

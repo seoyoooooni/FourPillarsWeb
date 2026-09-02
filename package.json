@@ -1,0 +1,11 @@
+{
+  "name": "fourpillars-web-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/serve.mjs dev",
+    "start": "node scripts/serve.mjs start",
+    "build": "yarn --cwd web build",
+    "test:backend": "cd backend && JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home ./mvnw test"
+  }
+}
