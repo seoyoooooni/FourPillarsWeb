@@ -8,6 +8,17 @@ export type Calculation = {
   stageThreeAnalysis: { cheondeokValue: string; gilsinByPillar: Record<string, string[]>; hyungsalByPillar: Record<string, string[]>; wonjinPairs: { first: string; second: string }[] };
   yongsinAnalysis: { strengthScore: number; strength: string; categoryCounts: Record<string, number>; yongsinElement: string; yongsinReason: string; weakPriority: string; strongPriority: string };
 };
+export type MajorRecommendation = {
+  studentType: string;
+  traits: Record<string, number>;
+  recommendations: {
+    faculty: string;
+    score: number;
+    reasons: string[];
+    departments: { department: string; score: number; reasons: string[] }[];
+  }[];
+  disclaimer: string;
+};
 
 const tokenKey = "fourpillars_access_token";
 const refreshKey = "fourpillars_refresh_token";
