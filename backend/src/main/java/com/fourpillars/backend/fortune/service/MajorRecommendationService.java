@@ -58,21 +58,12 @@ public class MajorRecommendationService {
         add(score, "탐구", categories.getOrDefault("인성", 0) * 6);
         add(score, "분석", categories.getOrDefault("인성", 0) * 3);
 
-        var normalized = new LinkedHashMap<String, Integer>();
-        score.forEach((key, value) -> normalized.put(key, Math.min(100, value)));
-        return normalized;
+        return normalizeTraits(score);
     }
 
     private MajorRecommendationResponse.FacultyRecommendation recommendation(Faculty faculty, Map<String, Integer> student) {
-        int distance = 0;
-        for (String trait : TRAITS) distance += Math.abs(student.get(trait) - faculty.traits().get(trait));
-        int match = Math.max(0, 100 - Math.round(distance / (float) TRAITS.size()));
-
-        var strengths = TRAITS.stream()
-                .sorted(Comparator.<String>comparingInt(trait -> Math.min(student.get(trait), faculty.traits().get(trait))).reversed())
-                .limit(2)
-                .toList();
-        var reasons = strengths.stream().map(trait -> trait + " 성향이 학부 특성과 잘 맞아요").toList();
+        int match = matchScore(student, faculty.traits());
+        var reasons = facultyReasons(faculty.name(), student);
 
         // 실제 세부학과 목록이 등록되면 같은 성향 벡터 방식으로 학부 내부 TOP 3를 계산한다.
         var departments = faculty.departments().stream()
@@ -83,12 +74,97 @@ public class MajorRecommendationService {
         return new MajorRecommendationResponse.FacultyRecommendation(faculty.name(), match, reasons, departments);
     }
 
+    private List<String> facultyReasons(String faculty, Map<String, Integer> student) {
+        return switch (faculty) {
+            case "기계공학부" -> List.of(
+                    combination(student, "실행", "분석") + "이 설계한 것을 실제 구조와 장치로 구현하는 흐름에 잘 맞아요",
+                    score(student, "탐구") + "의 탐구 성향이 작동 원리를 파고들고 개선점을 찾는 데 힘을 보태요");
+            case "IT융합공학부" -> List.of(
+                    combination(student, "분석", "탐구") + "이 논리를 세우고 새로운 기술을 탐색하는 과정에 강점이 있어요",
+                    score(student, "창의") + "의 창의 성향을 더해 기술을 새로운 서비스와 문제 해결 방식으로 연결할 수 있어요");
+            case "지구환경신소재공학부" -> List.of(
+                    combination(student, "탐구", "실행") + "이 현장 관찰과 소재 실험을 반복하는 연구 방식에 잘 맞아요",
+                    score(student, "분석") + "의 분석 성향이 실험 결과에서 의미 있는 차이를 찾아내는 데 도움이 돼요");
+            case "건축디자인학부" -> List.of(
+                    combination(student, "창의", "실행") + "이 아이디어를 실제 공간과 형태로 발전시키는 과정에 잘 맞아요",
+                    score(student, "소통") + "의 소통 성향이 사용자 요구를 듣고 설계 의도를 설명하는 데 힘이 돼요");
+            case "서비스경영학부" -> List.of(
+                    combination(student, "소통", "실행") + "이 사람의 요구를 파악하고 서비스 운영으로 옮기는 데 강점이 있어요",
+                    score(student, "분석") + "의 분석 성향이 고객과 시장의 흐름을 수치로 판단하는 데 도움이 돼요");
+            case "자유전공학부" -> List.of(
+                    combination(student, "탐구", "창의") + "이 여러 분야를 넘나들며 나만의 전공 방향을 찾는 데 잘 맞아요",
+                    score(student, "소통") + "의 소통 성향이 서로 다른 관점과 지식을 연결하는 데 힘을 보태요");
+            case "고숙련미래인재학부" -> List.of(
+                    combination(student, "실행", "분석") + "이 실무 기술을 빠르게 익히고 작업의 완성도를 높이는 데 잘 맞아요",
+                    score(student, "탐구") + "의 탐구 성향이 현장에서 필요한 새 기술을 꾸준히 습득하는 데 도움이 돼요");
+            default -> recommendationReasons(student, Map.of());
+        };
+    }
+
+    private String combination(Map<String, Integer> student, String first, String second) {
+        return "%s · %s 조합".formatted(score(student, first), score(student, second));
+    }
+
+    private String score(Map<String, Integer> student, String trait) {
+        return "%s %d".formatted(trait, student.get(trait));
+    }
+
     private MajorRecommendationResponse.DepartmentRecommendation departmentRecommendation(Department department, Map<String, Integer> student) {
+        int match = matchScore(student, department.traits());
+        return new MajorRecommendationResponse.DepartmentRecommendation(department.name(), match, recommendationReasons(student, department.traits()));
+    }
+
+    private Map<String, Integer> normalizeTraits(Map<String, Integer> raw) {
+        int minimum = raw.values().stream().min(Integer::compareTo).orElse(0);
+        int maximum = raw.values().stream().max(Integer::compareTo).orElse(0);
+        var normalized = new LinkedHashMap<String, Integer>();
+        if (maximum == minimum) {
+            TRAITS.forEach(trait -> normalized.put(trait, 65));
+            return normalized;
+        }
+        TRAITS.forEach(trait -> normalized.put(trait,
+                35 + Math.round((raw.get(trait) - minimum) * 60f / (maximum - minimum))));
+        return normalized;
+    }
+
+    private int matchScore(Map<String, Integer> student, Map<String, Integer> faculty) {
+        double studentAverage = TRAITS.stream().mapToInt(student::get).average().orElse(0);
+        double facultyAverage = TRAITS.stream().mapToInt(faculty::get).average().orElse(0);
+        double numerator = 0; double studentVariance = 0; double facultyVariance = 0;
         int distance = 0;
-        for (String trait : TRAITS) distance += Math.abs(student.get(trait) - department.traits().get(trait));
-        int match = Math.max(0, 100 - Math.round(distance / (float) TRAITS.size()));
-        var strongest = TRAITS.stream().max(Comparator.comparingInt(t -> Math.min(student.get(t), department.traits().get(t)))).orElse("탐구");
-        return new MajorRecommendationResponse.DepartmentRecommendation(department.name(), match, List.of(strongest + " 성향과 잘 맞아요"));
+        for (String trait : TRAITS) {
+            double studentOffset = student.get(trait) - studentAverage;
+            double facultyOffset = faculty.get(trait) - facultyAverage;
+            numerator += studentOffset * facultyOffset;
+            studentVariance += studentOffset * studentOffset;
+            facultyVariance += facultyOffset * facultyOffset;
+            distance += Math.abs(student.get(trait) - faculty.get(trait));
+        }
+        double correlation = studentVariance == 0 || facultyVariance == 0
+                ? 0 : numerator / Math.sqrt(studentVariance * facultyVariance);
+        double patternScore = (correlation + 1) * 50;
+        double distanceScore = 100 - distance / (double) TRAITS.size();
+        return Math.max(0, Math.min(96, (int) Math.round(patternScore * .65 + distanceScore * .35)));
+    }
+
+    private List<String> recommendationReasons(Map<String, Integer> student, Map<String, Integer> faculty) {
+        var sharedStrengths = TRAITS.stream()
+                .filter(trait -> student.get(trait) >= 60 && faculty.get(trait) >= 60)
+                .sorted(Comparator.<String>comparingInt(trait ->
+                        Math.min(student.get(trait), faculty.get(trait)) - Math.abs(student.get(trait) - faculty.get(trait)) / 2).reversed())
+                .limit(2)
+                .map(trait -> trait + " 성향이 학생과 학부 모두에서 강하게 나타나요")
+                .toList();
+        if (sharedStrengths.size() == 2) return sharedStrengths;
+
+        var reasons = new ArrayList<>(sharedStrengths);
+        TRAITS.stream()
+                .filter(trait -> reasons.stream().noneMatch(reason -> reason.startsWith(trait + " ")))
+                .sorted(Comparator.comparingInt(trait -> Math.abs(student.get(trait) - faculty.get(trait))))
+                .limit(2 - reasons.size())
+                .map(trait -> trait + " 성향의 강도가 학부 특성과 비슷해요")
+                .forEach(reasons::add);
+        return reasons;
     }
 
     private String studentType(Map<String, Integer> traits) {
@@ -104,7 +180,7 @@ public class MajorRecommendationService {
 
     private static LinkedHashMap<String, Integer> baseTraits() {
         var result = new LinkedHashMap<String, Integer>();
-        TRAITS.forEach(trait -> result.put(trait, 35));
+        TRAITS.forEach(trait -> result.put(trait, 0));
         return result;
     }
 

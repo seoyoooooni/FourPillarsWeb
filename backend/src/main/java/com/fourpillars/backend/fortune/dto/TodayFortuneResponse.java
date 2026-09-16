@@ -10,7 +10,8 @@ public record TodayFortuneResponse(
 
     public record Interaction(String type, String natalPosition, String natalValue, String todayValue, int effect) {}
     public record DailyFortune(int overall, int wealth, int love, int health, int career, int relationships,
-                               int study, String todayPillar, String todayTenGod, List<Interaction> interactions) {}
+                               int study, String todayPillar, String todayTenGod, String energyDescription,
+                               List<Interaction> interactions) {}
     public record AnnualRank(int rank, int totalDays, int topPercent) {}
     public record TrendPoint(LocalDate date, int score, boolean today) {}
 }

@@ -24,8 +24,8 @@
 .trait-card h2,.faculty-section h2{margin:0 0 21px;font-size:20px}
 .trait-row{display:grid;grid-template-columns:34px 1fr 28px;align-items:center;gap:12px;height:38px}
 .trait-row span{font-size:14px;font-weight:600}.trait-row i{height:4px;background:#d7d1c6;overflow:hidden}.trait-row b{display:block;height:100%;background:var(--accent)}.trait-row em{color:var(--muted);font-size:13px;font-style:normal;text-align:right}
-.faculty-section{padding-top:34px}.section-heading span{display:block;margin-bottom:7px}.faculty-card{display:grid;grid-template-columns:32px 1fr auto;gap:14px;padding:22px 0;border-top:1px solid #d8d2c7}.faculty-card:first-of-type{border-top-color:var(--ink)}
-.faculty-rank{padding-top:3px;color:var(--muted);font-family:serif;font-size:14px}.faculty-copy h3{margin:0 0 9px;font-size:19px}.faculty-copy ul{margin:0;padding:0;list-style:none;color:var(--muted);font-size:13px;line-height:1.65}.faculty-copy li:before{content:"·";margin-right:6px}.faculty-card>strong{font-size:25px}.faculty-card>strong small{font-size:12px;margin-left:2px;color:var(--muted)}
+.faculty-section{padding-top:34px}.faculty-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;padding:24px 0;border-top:1px solid #d8d2c7}.faculty-card:first-of-type{border-top-color:var(--ink)}
+.faculty-copy h3{margin:0 0 11px;font-size:19px}.faculty-copy ul{margin:0;padding:0;list-style:none;color:var(--muted);font-size:13px;line-height:1.65}.faculty-copy li+li{margin-top:4px}.faculty-copy li:before{content:"·";margin-right:6px}.faculty-card>strong{font-size:34px;line-height:1;font-variant-numeric:tabular-nums}.faculty-card>strong small{font-size:13px;margin-left:2px;color:var(--muted)}
 .department-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.department-list span{padding:6px 9px;border:1px solid var(--line);border-radius:12px;font-size:12px}
 .major-disclaimer{margin:25px 0;color:var(--muted);font-size:12px;line-height:1.55;text-align:center}
 @media (max-height:700px){.major-form{position:relative;inset:auto;margin-top:18px}.major-intro{margin-bottom:10px}.major-intro h1{font-size:27px}}

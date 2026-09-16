@@ -131,7 +131,36 @@ public class FortuneCalculationService {
         interactions.forEach(i -> { for (int x = 0; x < 6; x++) scores[x] += i.effect(); });
         for (int x = 0; x < 6; x++) scores[x] = Math.max(0, Math.min(100, scores[x]));
         int overall = (int) Math.floor((java.util.Arrays.stream(scores).average().orElse(0)) + .5d);
-        return new TodayFortuneResponse.DailyFortune(overall, scores[0], scores[1], scores[2], scores[3], scores[4], scores[5], day.stem() + day.branch(), todayTenGod, interactions);
+        var description = energyDescription(todayTenGod, overall, scores);
+        return new TodayFortuneResponse.DailyFortune(overall, scores[0], scores[1], scores[2], scores[3], scores[4], scores[5], day.stem() + day.branch(), todayTenGod, description, interactions);
+    }
+
+    private String energyDescription(String tenGod, int overall, int[] scores) {
+        var tenGodMessage = switch (tenGod) {
+            case "비견" -> "내 기준을 세우고 직접 움직일수록 힘이 실리는 날입니다.";
+            case "겁재" -> "경쟁심과 추진력이 커지기 쉬워 선택의 우선순위가 중요한 날입니다.";
+            case "식신" -> "여유 있게 표현하고 꾸준히 만들어 가는 일에 흐름이 좋은 날입니다.";
+            case "상관" -> "생각을 밖으로 드러내는 힘이 강해지지만 말의 속도는 조절하는 편이 좋습니다.";
+            case "편재" -> "새로운 사람이나 기회를 빠르게 알아보는 감각이 살아나는 날입니다.";
+            case "정재" -> "현실적인 판단과 차분한 관리가 좋은 결과로 이어지기 쉬운 날입니다.";
+            case "편관" -> "긴장과 책임이 커질 수 있어 무리한 정면 돌파보다 순서를 정하는 것이 좋습니다.";
+            case "정관" -> "원칙을 지키고 맡은 일을 정돈할수록 신뢰를 얻기 좋은 날입니다.";
+            case "편인" -> "익숙한 방식보다 직감과 새로운 관점에서 실마리를 찾기 좋은 날입니다.";
+            case "정인" -> "배우고 정리하며 도움을 받아들이는 과정에서 힘을 얻는 날입니다.";
+            default -> "평소의 리듬을 지키며 주변의 변화를 살펴보기 좋은 날입니다.";
+        };
+        var labels = List.of("재물", "애정", "건강", "직업", "관계", "학업");
+        int strongest = 0; int weakest = 0;
+        for (int i = 1; i < scores.length; i++) {
+            if (scores[i] > scores[strongest]) strongest = i;
+            if (scores[i] < scores[weakest]) weakest = i;
+        }
+        var balanceMessage = scores[weakest] <= 55
+                ? " 특히 %s 운은 좋지만, %s에서는 서두르지 않는 편이 좋겠습니다.".formatted(labels.get(strongest), labels.get(weakest))
+                : overall >= 70
+                ? " 특히 %s 운이 오늘의 흐름을 든든하게 받쳐줍니다.".formatted(labels.get(strongest))
+                : " 그중 %s 운을 중심으로 움직이면 하루의 균형을 잡기 좋겠습니다.".formatted(labels.get(strongest));
+        return tenGodMessage + balanceMessage;
     }
 
     private List<TodayFortuneResponse.Interaction> findInteractions(Pillars p, PillarPart today) {

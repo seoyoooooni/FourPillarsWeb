@@ -75,9 +75,8 @@ function MajorResults({ result }: { result: MajorRecommendation }) {
       </div>)}
     </article>
     <section className="faculty-section">
-      <div className="section-heading"><span>TOP 3</span><h2>추천 학부</h2></div>
-      {result.recommendations.map((recommendation, index) => <article className="faculty-card" key={recommendation.faculty}>
-        <div className="faculty-rank">{String(index + 1).padStart(2, "0")}</div>
+      <div className="section-heading"><h2>가장 잘 맞는 학부</h2></div>
+      {result.recommendations.map(recommendation => <article className="faculty-card" key={recommendation.faculty}>
         <div className="faculty-copy">
           <h3>{recommendation.faculty}</h3>
           <ul>{recommendation.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul>
