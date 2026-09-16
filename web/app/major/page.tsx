@@ -55,11 +55,11 @@ export default function MajorPage() {
       <div className="profile-row"><strong>태어난 시</strong><BirthTimeField value={time} onChange={setTime} /></div>
       {error && <p className="error">{error}</p>}
       <button className="primary" disabled={busy}>{busy ? "분석 중…" : "추천 학부 알아보기"}</button>
-    </form> : <MajorResults result={result} onReset={() => setResult(undefined)} />}
+    </form> : <MajorResults result={result} />}
   </main>;
 }
 
-function MajorResults({ result, onReset }: { result: MajorRecommendation; onReset: () => void }) {
+function MajorResults({ result }: { result: MajorRecommendation }) {
   return <section className="major-results">
     <header className="major-result-hero">
       <span>나의 대학생활 유형</span>
@@ -89,6 +89,5 @@ function MajorResults({ result, onReset }: { result: MajorRecommendation; onRese
       </article>)}
     </section>
     <p className="major-disclaimer">{result.disclaimer}</p>
-    <button className="outline major-reset" type="button" onClick={onReset}>다시 알아보기</button>
   </section>;
 }

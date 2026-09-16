@@ -5,6 +5,16 @@
 
 @media (hover:hover) and (pointer:fine){button:not(:disabled),a{transition:opacity 140ms ease}button:not(:disabled):hover,a:hover{opacity:.72}}
 @media (max-width:360px){.maui-menu-button{left:4px}.brand-logo{width:34px;height:34px}.maui-card{width:clamp(210px,min(72vw,calc((100svh - 170px)/1.62)),250px)}}
+
+/* Keep long actions visually consistent with the authentication pill button. */
+.primary,
+.outline {
+  border-color: var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  box-shadow: none;
+}
 @media (min-width:800px){.app-shell{width:min(calc(100% - 48px),1080px)}.content-shell,.result-shell,.form-shell{min-height:calc(100svh - 48px);margin-top:24px;margin-bottom:24px}.maui-home{background:radial-gradient(circle at 50% 45%,#f5f0e5 0,#f1ebdd 52%,#e9e1d2 100%)}.page-dots{bottom:40px}}
 
 /* Mobile app frame: full width on phones, phone-sized and centered elsewhere. */

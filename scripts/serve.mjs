@@ -10,8 +10,9 @@ const server = spawn(next, [mode], {
 });
 
 let opened = false;
+let stopping = false;
 const openWhenReady = async () => {
-  for (let attempt = 0; attempt < 80 && !opened; attempt += 1) {
+  for (let attempt = 0; attempt < 80 && !opened && !stopping; attempt += 1) {
     try {
       const response = await fetch("http://localhost:3000");
       if (response.ok) {
@@ -27,7 +28,11 @@ const openWhenReady = async () => {
 openWhenReady();
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
-  process.on(signal, () => server.kill(signal));
+  process.once(signal, () => {
+    stopping = true;
+    server.kill(signal);
+    process.exit(signal === "SIGINT" ? 130 : 143);
+  });
 }
 
 server.on("exit", (code) => process.exit(code ?? 0));

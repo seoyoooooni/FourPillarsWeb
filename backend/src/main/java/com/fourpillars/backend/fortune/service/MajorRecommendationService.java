@@ -34,7 +34,7 @@ public class MajorRecommendationService {
                 .toList();
         return new MajorRecommendationResponse(
                 studentType(traits), traits, ranked,
-                "사주 성향을 활용한 탐색용 결과이며 입학·전공 결정을 대신하지 않습니다.");
+                "사주 성향을 바탕으로 한 가벼운 탐색 결과로 참고해 주세요.");
     }
 
     private Map<String, Integer> studentTraits(FortuneCalculationResponse fortune) {

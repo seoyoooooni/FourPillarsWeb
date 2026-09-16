@@ -25,11 +25,11 @@ const alphas = [.2,.38,1,.38,.2];
 
 export default function Home() {
   const router = useRouter();
-  const [focus, setFocus] = useState(2); const [selected, setSelected] = useState<number>(); const [menu, setMenu] = useState(false); const [profile,setProfile]=useState<Profile>(); const [drawerX,setDrawerX]=useState(0); const [drawerDragging,setDrawerDragging]=useState(false);
+  const [focus, setFocus] = useState(2); const [menu, setMenu] = useState(false); const [profile,setProfile]=useState<Profile>(); const [drawerX,setDrawerX]=useState(0); const [drawerDragging,setDrawerDragging]=useState(false);
   const startX = useRef(0); const didSwipe=useRef(false); const drawerStartX=useRef<number|null>(null); const loggedIn = hasToken();
-  function cardClick(index:number) { if(didSwipe.current){didSwipe.current=false;return} if(selected === index) { if(cards[index].href !== "#") router.push(cards[index].href); } else setSelected(index); }
+  function cardClick(index:number) { if(didSwipe.current){didSwipe.current=false;return} if(cards[index].href !== "#") router.push(cards[index].href); }
   function pointerDown(e:PointerEvent<HTMLDivElement>) { startX.current=e.clientX;didSwipe.current=false; }
-  function pointerUp(e:PointerEvent<HTMLDivElement>) { const delta=e.clientX-startX.current; if(Math.abs(delta)>=32){didSwipe.current=true;setSelected(undefined);setFocus(v=>Math.max(0,Math.min(cards.length-1,v+(delta<0?1:-1))));} }
+  function pointerUp(e:PointerEvent<HTMLDivElement>) { const delta=e.clientX-startX.current; if(Math.abs(delta)>=32){didSwipe.current=true;setFocus(v=>Math.max(0,Math.min(cards.length-1,v+(delta<0?1:-1))));} }
   function pointerCancel(){didSwipe.current=false}
   function closeMenu(){setDrawerDragging(false);setDrawerX(-286);window.setTimeout(()=>{setMenu(false);setDrawerX(0)},180)}
   function drawerDown(e:PointerEvent<HTMLElement>){drawerStartX.current=e.clientX-drawerX;setDrawerDragging(true)}
@@ -38,8 +38,8 @@ export default function Home() {
   return <main className="maui-home">
     <button className="maui-menu-button" onClick={()=>{setMenu(true);if(loggedIn)api<Profile>("/api/profile",{},true).then(setProfile).catch(()=>setProfile(undefined))}} aria-label="메뉴">☰</button>
     <div className="brand-logo" aria-label="Four Pillars"><i/><b/><b/><b/><b/><em/></div>
-    <div className="maui-deck" onClick={()=>setSelected(undefined)} onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={pointerCancel}>
-      {cards.map((card,index)=>{const slot=index-focus; const visible=slot>=-2&&slot<=2; const pos=visible?slot+2:slot<0?0:4; const chosen=selected===index; const x=chosen?"0px":offsets[pos][0]; return <button className={`maui-card ${chosen?"selected":""}`} key={card.title} onClick={e=>{e.stopPropagation();cardClick(index)}} style={{transform:`translate(calc(-50% + ${x}), ${chosen?-64:offsets[pos][1]}px) rotate(${chosen?0:angles[pos]}deg) scale(${chosen?1.14:scales[pos]})`,opacity:visible?(chosen?1:alphas[pos]):0,zIndex:chosen?20:10-Math.abs(slot)}}><div className="card-inner"><span className="card-number">{card.number}</span><div className="card-image"><Image src={card.image} fill sizes="(max-width: 480px) 72vw, 350px" alt="" priority /></div><strong>{card.title}</strong></div></button>})}
+    <div className="maui-deck" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={pointerCancel}>
+      {cards.map((card,index)=>{const slot=index-focus; const visible=slot>=-2&&slot<=2; const pos=visible?slot+2:slot<0?0:4; return <button className="maui-card" key={card.title} onClick={()=>cardClick(index)} style={{transform:`translate(calc(-50% + ${offsets[pos][0]}), ${offsets[pos][1]}px) rotate(${angles[pos]}deg) scale(${scales[pos]})`,opacity:visible?alphas[pos]:0,zIndex:10-Math.abs(slot)}}><div className="card-inner"><span className="card-number">{card.number}</span><div className="card-image"><Image src={card.image} fill sizes="(max-width: 480px) 72vw, 350px" alt="" priority /></div><strong>{card.title}</strong></div></button>})}
     </div>
     <div className="page-dots">{cards.map((_,i)=><i className={i===focus?"active":""} key={i}/>)}</div>
     {menu&&<div className="maui-dim" onClick={closeMenu}><aside className="maui-drawer" style={{transform:`translateX(${drawerX}px)`,transition:drawerDragging?"none":"transform 180ms cubic-bezier(.55,0,1,.45)"}} onPointerDown={drawerDown} onPointerMove={drawerMove} onPointerUp={drawerUp} onPointerCancel={drawerUp} onClick={e=>e.stopPropagation()}><button className="drawer-profile" onPointerDown={e=>e.stopPropagation()} onClick={()=>router.push(loggedIn?"/profile":"/login")}><strong>{loggedIn?(profile?.displayName??"프로필을 설정하세요"):"로그인하세요"}</strong>{profile&&<small>{formatBirthDate(profile.birthDate)}</small>}</button><hr/><div/><button onPointerDown={e=>e.stopPropagation()} onClick={()=>router.push("/settings")}>설정</button><button onPointerDown={e=>e.stopPropagation()} onClick={()=>{if(loggedIn)logout();else router.push("/login");closeMenu()}}>{loggedIn?"로그아웃":"로그인"}</button></aside></div>}
