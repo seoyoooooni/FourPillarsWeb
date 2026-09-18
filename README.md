@@ -1,6 +1,6 @@
 # FourPillars Web
 
-- `web`: Next.js 16, React 19, TypeScript 웹 클라이언트
+- `frontend`: Next.js 16, React 19, TypeScript 웹 클라이언트
 - `backend`: Java 21, Spring Boot, PostgreSQL API와 서버 계산 엔진
 
 ## 로컬 실행

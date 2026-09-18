@@ -3,9 +3,9 @@ import { resolve } from "node:path";
 
 const mode = process.argv[2] === "start" ? "start" : "dev";
 const root = resolve(import.meta.dirname, "..");
-const next = resolve(root, "web/node_modules/.bin/next");
+const next = resolve(root, "frontend/node_modules/.bin/next");
 const server = spawn(next, [mode], {
-  cwd: resolve(root, "web"),
+  cwd: resolve(root, "frontend"),
   stdio: "inherit",
 });
 
