@@ -24,26 +24,63 @@ body {
   color: var(--ink);
 }
 
+.brand-logo {
+  top: calc(17px + env(safe-area-inset-top));
+  width: 56px;
+  height: 56px;
+  color: var(--ink);
+}
+
 .maui-card {
-  border: 1.5px solid var(--ink);
-  border-radius: 11px;
+  width: clamp(196px, min(63.6cqw, calc((100svh - 190px) / 1.85)), 292px);
+  aspect-ratio: 1 / 1.72;
+  border: 0;
+  border-radius: 15px;
   background: #fff;
   box-shadow: 0 12px 30px #12356624, 0 2px 5px #12356612;
 }
 
 .card-inner {
-  border: 1.5px solid var(--ink);
-  border-radius: 4px;
+  inset: 10px;
+  border: 2px solid var(--ink);
+  border-radius: 7px;
+  grid-template-rows: minmax(0, 1fr) 48px;
+}
+
+.card-number {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  background: transparent;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.card-number::before,
+.card-number::after {
+  content: none;
 }
 
 .card-image {
+  grid-row: 1;
+  margin: 0;
+  border-radius: 4px 4px 0 0;
   background: #e8f0f9;
 }
 
 .card-inner > strong {
+  grid-row: 2;
+  display: grid;
+  place-items: center;
   background: #fff;
-  border-top: 1.5px solid var(--ink);
+  border-top: 2px solid var(--ink);
   color: var(--ink);
+  font-size: clamp(16px, 4.5cqw, 20px);
+  line-height: 1.1;
 }
 
 .page-dots i {
