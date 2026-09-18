@@ -1,0 +1,99 @@
+:root {
+  --cream: #f5f8fc;
+  --warm: #ffffff;
+  --ink: #0e2f63;
+  --muted: #647795;
+  --line: #cbd8e8;
+  --accent: #2f6d68;
+}
+
+html {
+  background: #e8eff8;
+}
+
+body {
+  background: var(--cream);
+  box-shadow: 0 0 48px #0e2f631c;
+}
+
+.maui-home {
+  background: radial-gradient(ellipse at 50% 50%, #ffffff 0%, #f5f9fe 55%, #eaf2fb 100%);
+}
+
+.maui-menu-button {
+  color: var(--ink);
+}
+
+.maui-card {
+  border: 1.5px solid var(--ink);
+  border-radius: 11px;
+  background: #fff;
+  box-shadow: 0 12px 30px #12356624, 0 2px 5px #12356612;
+}
+
+.card-inner {
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+}
+
+.card-image {
+  background: #e8f0f9;
+}
+
+.card-inner > strong {
+  background: #fff;
+  border-top: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+
+.page-dots i {
+  background: #b3c5dc;
+}
+
+.page-dots i.active {
+  background: var(--ink);
+}
+
+.maui-dim {
+  background: #0e2f6352;
+}
+
+.maui-drawer {
+  background: #fff;
+}
+
+.results article {
+  border-bottom-color: var(--line);
+}
+
+.element i,
+.element b {
+  background: #ccd9e8;
+}
+
+.results .pillars div {
+  background: #eaf1f9;
+}
+
+.score-grid i {
+  background: #e1eaf5;
+}
+
+.auth-input input::placeholder {
+  color: #8192a9;
+}
+
+.major-form > .primary,
+.auth-submit,
+.profile-save,
+.picker-confirm {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 8px 20px #0e2f6326;
+}
+
+@media (min-width: 800px) {
+  .maui-home {
+    background: radial-gradient(ellipse at 50% 50%, #ffffff 0%, #f5f9fe 55%, #eaf2fb 100%);
+  }
+}

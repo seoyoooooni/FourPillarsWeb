@@ -3,6 +3,7 @@ import "./globals.css";
 import "./fidelity.css";
 import "./forms-fidelity.css";
 import "./pickers.css";
+import "./campus-theme.css";
 
 export const metadata: Metadata = {
   title: "사주, 마음을 비추다",
@@ -13,7 +14,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#f1ebdd",
+  themeColor: "#f5f8fc",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
