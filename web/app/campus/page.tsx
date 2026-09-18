@@ -44,7 +44,7 @@ export default function CampusPage() {
       : !data ? <div className="loading">오늘의 캠퍼스 흐름을 살펴보는 중…</div>
       : <section className="campus-result">
         <div className="campus-hero">
-          <span>{new Intl.DateTimeFormat("ko-KR", { month: "long", day: "numeric", weekday: "long" }).format(new Date())}</span>
+          <span className="result-meta">{new Intl.DateTimeFormat("ko-KR", { month: "long", day: "numeric", weekday: "long" }).format(new Date())}</span>
           <p>오늘의 캠퍼스 지수</p>
           <strong>{data.fortune.overall}</strong><em>점</em>
           <small>{campusMessage(data.fortune.overall, todayKey)}</small>

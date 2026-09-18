@@ -35,6 +35,17 @@
 .auth-actions>a strong{font-weight:600}
 .auth-action-spacer{height:17px}
 
+.today-result>.result-meta,
+.major-result-hero>.result-meta,
+.campus-hero>.result-meta {
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.5;
+  text-transform: none;
+}
+
 .maui-form .primary,
 .auth-submit {
   border: 1px solid var(--ink);

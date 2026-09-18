@@ -62,7 +62,7 @@ export default function MajorPage() {
 function MajorResults({ result }: { result: MajorRecommendation }) {
   return <section className="major-results">
     <header className="major-result-hero">
-      <span>나의 대학생활 유형</span>
+      <span className="result-meta">나의 대학생활 유형</span>
       <h1>{result.studentType}</h1>
       <p>사주에 나타난 기질을 학습과 전공 탐색의 관점으로 풀어봤어요.</p>
     </header>
