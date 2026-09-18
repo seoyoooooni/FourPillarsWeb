@@ -72,6 +72,11 @@ body {
   background: #e8f0f9;
 }
 
+.card-image img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
 .card-inner > strong {
   grid-row: 2;
   display: grid;
