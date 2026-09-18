@@ -42,7 +42,7 @@ body {
 
 .card-inner {
   inset: 10px;
-  border: 2px solid var(--ink);
+  border: 1.5px solid var(--ink);
   border-radius: 7px;
   grid-template-rows: minmax(0, 1fr) 48px;
 }
@@ -77,10 +77,11 @@ body {
   display: grid;
   place-items: center;
   background: #fff;
-  border-top: 2px solid var(--ink);
+  border-top: 1.5px solid var(--ink);
   color: var(--ink);
   font-size: clamp(16px, 4.5cqw, 20px);
   line-height: 1.1;
+  font-weight: 700;
 }
 
 .page-dots i {
