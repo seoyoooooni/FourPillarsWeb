@@ -23,11 +23,12 @@ const offsets = [
 ] as const;
 const scales = [.72,.84,1,.84,.72];
 const alphas = [.2,.38,1,.38,.2];
+let rememberedFocus = 2;
 
 export default function Home() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [focus, setFocus] = useState(2); const [menu, setMenu] = useState(false); const [profile,setProfile]=useState<Profile>(); const [drawerX,setDrawerX]=useState(0); const [drawerDragging,setDrawerDragging]=useState(false);
+  const [focus, setFocus] = useState(() => rememberedFocus); const [menu, setMenu] = useState(false); const [profile,setProfile]=useState<Profile>(); const [drawerX,setDrawerX]=useState(0); const [drawerDragging,setDrawerDragging]=useState(false);
   const startX = useRef(0); const didSwipe=useRef(false); const drawerStartX=useRef<number|null>(null); const loggedIn = hasToken();
   function cardClick(index:number) { if(didSwipe.current){didSwipe.current=false;return} if(cards[index].href !== "#") router.push(cards[index].href); }
   function pointerDown(e:PointerEvent<HTMLDivElement>) { startX.current=e.clientX;didSwipe.current=false; }
@@ -38,6 +39,7 @@ export default function Home() {
   function drawerMove(e:PointerEvent<HTMLElement>){if(drawerStartX.current!==null)setDrawerX(Math.max(-286,Math.min(0,e.clientX-drawerStartX.current)))}
   function drawerUp(){drawerStartX.current=null;setDrawerDragging(false);if(drawerX<=-71.5)closeMenu();else setDrawerX(0)}
   useEffect(() => setMounted(true), []);
+  useEffect(() => { rememberedFocus = focus; }, [focus]);
   if (!mounted) return <main className="app-shell auth-shell" />;
   if (!loggedIn) return <main className="app-shell auth-shell"><SignupOnboarding /></main>;
   return <main className="maui-home">
