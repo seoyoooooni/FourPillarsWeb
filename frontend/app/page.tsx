@@ -30,24 +30,34 @@ export default function Home() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [focus, setFocus] = useState(() => rememberedFocus); const [menu, setMenu] = useState(false); const [profile,setProfile]=useState<Profile>(); const [drawerX,setDrawerX]=useState(0); const [drawerDragging,setDrawerDragging]=useState(false);
-  const startX = useRef(0); const didSwipe=useRef(false); const drawerStartX=useRef<number|null>(null); const loggedIn = hasToken();
+  const startX = useRef(0); const didSwipe=useRef(false); const drawerStartX=useRef<number|null>(null); const drawerPointerId=useRef<number|null>(null); const closeTimer=useRef<number|null>(null); const loggedIn = hasToken();
   function cardClick(index:number) { if(didSwipe.current){didSwipe.current=false;return} if(cards[index].href !== "#") router.push(cards[index].href); }
   function pointerDown(e:PointerEvent<HTMLDivElement>) { startX.current=e.clientX;didSwipe.current=false; }
   function pointerUp(e:PointerEvent<HTMLDivElement>) { const delta=e.clientX-startX.current; if(Math.abs(delta)>=32){didSwipe.current=true;setFocus(v=>Math.max(0,Math.min(cards.length-1,v+(delta<0?1:-1))));} }
   function pointerCancel(){didSwipe.current=false}
-  function closeMenu(){setDrawerDragging(false);setDrawerX(-286);window.setTimeout(()=>{setMenu(false);setDrawerX(0)},180)}
-  function drawerDown(e:PointerEvent<HTMLElement>){drawerStartX.current=e.clientX-drawerX;setDrawerDragging(true)}
-  function drawerMove(e:PointerEvent<HTMLElement>){if(drawerStartX.current!==null)setDrawerX(Math.max(-286,Math.min(0,e.clientX-drawerStartX.current)))}
-  function drawerUp(){drawerStartX.current=null;setDrawerDragging(false);if(drawerX<=-71.5)closeMenu();else setDrawerX(0)}
+  function clearCloseTimer(){if(closeTimer.current!==null){window.clearTimeout(closeTimer.current);closeTimer.current=null}}
+  function openMenu(){clearCloseTimer();setMenu(true);if(loggedIn)api<Profile>("/api/profile",{},true).then(setProfile).catch(()=>setProfile(undefined))}
+  function closeMenu(){clearCloseTimer();setDrawerDragging(false);setDrawerX(-286);closeTimer.current=window.setTimeout(()=>{setMenu(false);setDrawerX(0);closeTimer.current=null},180)}
+  function drawerDown(e:PointerEvent<HTMLElement>){clearCloseTimer();drawerPointerId.current=e.pointerId;e.currentTarget.setPointerCapture(e.pointerId);drawerStartX.current=e.clientX-drawerX;setDrawerDragging(true)}
+  function drawerMove(e:PointerEvent<HTMLElement>){if(drawerStartX.current===null||e.pointerId!==drawerPointerId.current)return;setDrawerX(Math.max(-286,Math.min(0,e.clientX-drawerStartX.current)))}
+  function drawerUp(e:PointerEvent<HTMLElement>){if(e.pointerId!==drawerPointerId.current)return;drawerPointerId.current=null;drawerStartX.current=null;setDrawerDragging(false);if(drawerX<=-71.5)closeMenu();else setDrawerX(0)}
   useEffect(() => setMounted(true), []);
   useEffect(() => { rememberedFocus = focus; }, [focus]);
   if (!mounted) return <main className="app-shell auth-shell" />;
   if (!loggedIn) return <main className="app-shell auth-shell"><SignupOnboarding /></main>;
   return <main className="maui-home">
-    <button className="maui-menu-button" onClick={()=>{setMenu(true);if(loggedIn)api<Profile>("/api/profile",{},true).then(setProfile).catch(()=>setProfile(undefined))}} aria-label="메뉴">☰</button>
-    <svg className="brand-logo" viewBox="0 0 88 88" role="img" aria-label="별과 펼친 책 로고">
-      <path d="M44 8 46 29 58 20 49 32 66 32 49 35 58 47 46 38 44 59 42 38 30 47 39 35 22 32 39 32 30 20 42 29Z" fill="currentColor"/>
-      <path d="M12 45h2m60 0h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <button className="maui-menu-button" onClick={openMenu} aria-label="메뉴">☰</button>
+    <svg className="brand-logo" viewBox="0 0 88 88" role="img" aria-label="펼친 책 위에 앉은 부엉이 마스코트 로고">
+      <path d="M22 20 32 10 34 24Z" fill="currentColor"/>
+      <path d="M66 20 56 10 54 24Z" fill="currentColor"/>
+      <circle cx="44" cy="38" r="20" fill="none" stroke="currentColor" strokeWidth="3.5"/>
+      <path d="M44 20 45.5 24 49.5 25.5 45.5 27 44 31 42.5 27 38.5 25.5 42.5 24Z" fill="currentColor"/>
+      <ellipse cx="35" cy="40" rx="4.5" ry="5.5" fill="currentColor"/>
+      <ellipse cx="53" cy="40" rx="4.5" ry="5.5" fill="currentColor"/>
+      <path d="M41 47 47 47 44 52Z" fill="currentColor"/>
+      <path d="M25 42Q19 48 23 56" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M63 42Q69 48 65 56" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M38 58v7M50 58v7" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
       <path d="M20 65c9-1.5 17-.4 24 3 7-3.4 15-4.5 24-3M20 70c9-1.5 17-.4 24 3 7-3.4 15-4.5 24-3M20 75c9-1.5 17-.4 24 3 7-3.4 15-4.5 24-3M44 68v10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
     <div className="maui-deck" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={pointerCancel}>
