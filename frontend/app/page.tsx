@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PointerEvent, useEffect, useRef, useState } from "react";
 import { api, hasToken, logout, Profile } from "@/lib/api";
 import { SignupOnboarding } from "@/components/SignupOnboarding";
+import { FortuneCalendar } from "@/components/FortuneCalendar";
 
 const cards = [
   { href: "/decision", image: "/images/card-compatibility-inha-v2.png", title: "운명저울", number: "I" },
@@ -53,7 +54,7 @@ export default function Home() {
       {cards.map((card,index)=>{const slot=index-focus; const visible=slot>=-2&&slot<=2; const pos=visible?slot+2:slot<0?0:4; return <button className="maui-card" key={card.title} onClick={()=>cardClick(index)} style={{transform:`translate(calc(-50% + ${offsets[pos][0]}), ${offsets[pos][1]}px) rotate(${angles[pos]}deg) scale(${scales[pos]})`,opacity:visible?alphas[pos]:0,zIndex:10-Math.abs(slot)}}><div className="card-inner"><span className="card-number">{card.number}</span><div className="card-image"><Image src={card.image} fill sizes="(max-width: 480px) 64vw, 292px" alt="" priority draggable={false} onDragStart={(event)=>event.preventDefault()} /></div><strong>{card.title}</strong></div></button>})}
     </div>
     <div className="page-dots">{cards.map((_,i)=><i className={i===focus?"active":""} key={i}/>)}</div>
-    {menu&&<div className="maui-dim" onClick={closeMenu}><aside className="maui-drawer" style={{transform:`translateX(${drawerX}px)`,transition:drawerDragging?"none":"transform 180ms cubic-bezier(.55,0,1,.45)"}} onPointerDown={drawerDown} onPointerMove={drawerMove} onPointerUp={drawerUp} onPointerCancel={drawerUp} onClick={e=>e.stopPropagation()}><button className="drawer-profile" onPointerDown={e=>e.stopPropagation()} onClick={()=>router.push(loggedIn?"/profile":"/login")}><strong>{loggedIn?(profile?.displayName??"프로필을 설정하세요"):"로그인하세요"}</strong>{profile&&<small>{formatBirthDate(profile.birthDate)}</small>}</button><hr/><div/><button onPointerDown={e=>e.stopPropagation()} onClick={()=>router.push("/settings")}>설정</button><button onPointerDown={e=>e.stopPropagation()} onClick={()=>{if(loggedIn)logout();else router.push("/login");closeMenu()}}>{loggedIn?"로그아웃":"로그인"}</button></aside></div>}
+    {menu&&<div className="maui-dim" onClick={closeMenu}><aside className="maui-drawer" style={{transform:`translateX(${drawerX}px)`,transition:drawerDragging?"none":"transform 180ms cubic-bezier(.55,0,1,.45)"}} onPointerDown={drawerDown} onPointerMove={drawerMove} onPointerUp={drawerUp} onPointerCancel={drawerUp} onClick={e=>e.stopPropagation()}><button className="drawer-profile" onPointerDown={e=>e.stopPropagation()} onClick={()=>router.push(loggedIn?"/profile":"/login")}><strong>{loggedIn?(profile?.displayName??"프로필을 설정하세요"):"로그인하세요"}</strong>{profile&&<small>{formatBirthDate(profile.birthDate)}</small>}</button><hr/><FortuneCalendar/><button onPointerDown={e=>e.stopPropagation()} onClick={()=>router.push("/settings")}>설정</button><button onPointerDown={e=>e.stopPropagation()} onClick={()=>{if(loggedIn)logout();else router.push("/login");closeMenu()}}>{loggedIn?"로그아웃":"로그인"}</button></aside></div>}
   </main>;
 }
 function formatBirthDate(value:string){const [y,m,d]=value.split("-").map(Number);return `${y}년 ${m}월 ${d}일`}

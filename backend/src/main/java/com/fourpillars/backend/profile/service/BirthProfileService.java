@@ -10,6 +10,7 @@ import com.fourpillars.backend.profile.repository.BirthProfileRepository;
 import com.fourpillars.backend.fortune.service.FortuneCalculationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.UUID;
 
@@ -18,12 +19,14 @@ public class BirthProfileService {
     private final BirthProfileRepository profileRepository;
     private final UserAccountRepository userRepository;
     private final FortuneCalculationService fortuneCalculationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public BirthProfileService(BirthProfileRepository profileRepository, UserAccountRepository userRepository,
-                               FortuneCalculationService fortuneCalculationService) {
+                               FortuneCalculationService fortuneCalculationService, ApplicationEventPublisher eventPublisher) {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.fortuneCalculationService = fortuneCalculationService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -39,6 +42,8 @@ public class BirthProfileService {
                 new BirthProfile(userRepository.getReferenceById(userId)));
         profile.update(request.displayName(), request.birthDate(), request.birthTime(), request.calendarType(),
                 request.leapMonth(), request.gender());
-        return BirthProfileResponse.from(profileRepository.save(profile));
+        var response = BirthProfileResponse.from(profileRepository.save(profile));
+        eventPublisher.publishEvent(new com.fourpillars.backend.fortune.service.ProfileFortuneRefreshRequested(userId, response));
+        return response;
     }
 }

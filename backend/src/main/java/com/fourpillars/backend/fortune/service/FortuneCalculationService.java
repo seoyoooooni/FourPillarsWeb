@@ -124,11 +124,15 @@ public class FortuneCalculationService {
     }
 
     public TodayFortuneResponse today(BirthProfileResponse profile) {
+        return forDate(profile, LocalDate.now(ZoneId.of("Asia/Seoul")));
+    }
+
+    public TodayFortuneResponse forDate(BirthProfileResponse profile, LocalDate targetDate) {
         var natalCalculation = calculate(new FortuneCalculationRequest(profile.birthDate(), profile.birthTime(), profile.calendarType(), profile.leapMonth()));
         var p = natalCalculation.pillars();
         var y = split(p.get("year")); var m = split(p.get("month")); var d = split(p.get("day")); var h = split(p.get("hour"));
         var natal = new Pillars(y.stem(), y.branch(), m.stem(), m.branch(), d.stem(), d.branch(), h.stem(), h.branch());
-        var today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        var today = targetDate;
         var current = solarRecords.get(today.toString());
         if (current == null) throw new IllegalArgumentException("오늘 날짜는 아직 만세력 데이터 지원 범위에 포함되지 않습니다.");
         var fortune = dailyFortune(natal, current, natalCalculation.yongsinAnalysis().yongsinElement(), profile.gender().name());
@@ -140,6 +144,20 @@ public class FortuneCalculationService {
             if (record != null) recent.add(new TodayFortuneResponse.TrendPoint(date, dailyFortune(natal, record, natalCalculation.yongsinAnalysis().yongsinElement(), profile.gender().name()).overall(), offset == 0));
         }
         return new TodayFortuneResponse(fortune, new TodayFortuneResponse.AnnualRank(rank, annual.size(), Math.max(1, (int) Math.ceil(rank * 100d / annual.size()))), recent);
+    }
+
+    public Map<LocalDate, TodayFortuneResponse.DailyFortune> calculateYear(BirthProfileResponse profile, int year) {
+        var natalCalculation = calculate(new FortuneCalculationRequest(profile.birthDate(), profile.birthTime(), profile.calendarType(), profile.leapMonth()));
+        var p = natalCalculation.pillars();
+        var y = split(p.get("year")); var m = split(p.get("month")); var d = split(p.get("day")); var h = split(p.get("hour"));
+        var natal = new Pillars(y.stem(), y.branch(), m.stem(), m.branch(), d.stem(), d.branch(), h.stem(), h.branch());
+        var usefulElement = natalCalculation.yongsinAnalysis().yongsinElement();
+        var result = new LinkedHashMap<LocalDate, TodayFortuneResponse.DailyFortune>();
+        solarRecords.values().stream()
+                .filter(record -> record.solarDate().startsWith(year + "-"))
+                .forEach(record -> result.put(LocalDate.parse(record.solarDate()),
+                        dailyFortune(natal, record, usefulElement, profile.gender().name())));
+        return result;
     }
 
     private TodayFortuneResponse.DailyFortune dailyFortune(Pillars natal, PillarRecord record, String usefulElement, String gender) {
