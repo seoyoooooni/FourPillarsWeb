@@ -11,7 +11,9 @@ export type Calculation = {
 export type MajorRecommendation = {
   studentType: string;
   traits: Record<string, number>;
+  aptitudes: Record<string, number>;
   recommendations: {
+    role: string;
     department: string;
     score: number;
     reasons: string[];

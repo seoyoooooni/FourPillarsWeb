@@ -24,12 +24,13 @@ class MajorRecommendationServiceTests {
                 .extracting(recommendation -> recommendation.department())
                 .doesNotContain("전공심화과정");
         assertThat(result.traits()).containsOnlyKeys("분석", "창의", "소통", "실행", "탐구");
-        assertThat(result.traits().values()).contains(35, 95);
+        assertThat(result.aptitudes()).hasSize(8);
+        assertThat(result.traits().values()).allMatch(score -> score >= 30 && score <= 90);
         assertThat(result.recommendations()).extracting(recommendation -> recommendation.department()).doesNotHaveDuplicates();
-        assertThat(result.recommendations()).extracting(recommendation -> recommendation.score())
-                .isSortedAccordingTo(java.util.Comparator.reverseOrder());
+        assertThat(result.recommendations()).extracting(recommendation -> recommendation.role())
+                .containsExactly("가장 잘 맞는 학과", "성장 가능성이 큰 학과", "숨은 적성이 있는 학과");
         assertThat(result.recommendations()).allSatisfy(recommendation -> {
-            assertThat(recommendation.score()).isBetween(0, 96);
+            assertThat(recommendation.score()).isBetween(30d, 90d);
             assertThat(recommendation.reasons()).hasSize(2);
         });
     }
@@ -68,6 +69,19 @@ class MajorRecommendationServiceTests {
 
         assertThat(analytical.recommendations().getFirst().department())
                 .isNotEqualTo(creative.recommendations().getFirst().department());
+        assertThat(analytical.studentType()).isNotEqualTo(creative.studentType());
+    }
+
+    @Test
+    void definesAUniqueTypeForEveryOrderedPairOfTraits() {
+        var traits = List.of("분석", "창의", "소통", "실행", "탐구");
+        var names = new java.util.ArrayList<String>();
+        for (String primary : traits) {
+            for (String secondary : traits) {
+                if (!primary.equals(secondary)) names.add(MajorRecommendationService.typeName(primary, secondary));
+            }
+        }
+        assertThat(names).hasSize(20).doesNotHaveDuplicates();
     }
 
     private static FortuneCalculationResponse fortune(Map<String, Integer> elements, Map<String, Integer> categories) {

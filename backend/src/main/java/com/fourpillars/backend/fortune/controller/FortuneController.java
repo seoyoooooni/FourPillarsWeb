@@ -4,6 +4,7 @@ import com.fourpillars.backend.fortune.dto.FortuneCalculationRequest;
 import com.fourpillars.backend.fortune.dto.FortuneCalculationResponse;
 import com.fourpillars.backend.fortune.dto.TodayFortuneResponse;
 import com.fourpillars.backend.fortune.dto.MajorRecommendationResponse;
+import com.fourpillars.backend.fortune.dto.MajorRecommendationRequest;
 import com.fourpillars.backend.fortune.service.FortuneCalculationService;
 import com.fourpillars.backend.fortune.service.MajorRecommendationService;
 import com.fourpillars.backend.profile.service.BirthProfileService;
@@ -38,8 +39,9 @@ public class FortuneController {
     }
 
     @PostMapping("/major-recommendations")
-    public MajorRecommendationResponse recommendMajors(@Valid @RequestBody FortuneCalculationRequest request) {
-        return majorRecommendationService.recommend(service.calculate(request));
+    public MajorRecommendationResponse recommendMajors(@Valid @RequestBody MajorRecommendationRequest request) {
+        return majorRecommendationService.recommend(service.calculate(request.fortuneRequest()),
+                request.interests(), request.environments());
     }
 
     @GetMapping("/today")

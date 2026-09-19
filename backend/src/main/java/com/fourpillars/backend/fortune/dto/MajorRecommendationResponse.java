@@ -6,8 +6,10 @@ import java.util.Map;
 public record MajorRecommendationResponse(
         String studentType,
         Map<String, Integer> traits,
+        Map<String, Integer> aptitudes,
         List<DepartmentRecommendation> recommendations,
         String disclaimer) {
     public record DepartmentRecommendation(
-            String department, int score, List<String> reasons, String sourceUrl, String admissionNote) {}
+            String role, String department, double score, List<String> reasons,
+            String sourceUrl, String admissionNote) {}
 }
