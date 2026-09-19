@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [{ source: "/backend/:path*", destination: `${process.env.BACKEND_URL ?? "http://127.0.0.1:8080"}/:path*` }];
   },
+  allowedDevOrigins: ["192.168.123.100"],
 };
 
 export default nextConfig;

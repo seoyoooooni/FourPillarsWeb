@@ -23,20 +23,45 @@ body {
 }
 
 .maui-card {
-  width: clamp(196px, min(63.6cqw, calc((100svh - 190px) / 1.85)), 292px);
+  top: clamp(150px, 20svh, 190px);
+  width: clamp(196px, min(63.6cqw, calc((100svh - 210px) / 1.85)), 292px);
   aspect-ratio: 1 / 1.72;
-  border: 0;
-  border-radius: 15px;
-  background: var(--warm);
+  border: 2px solid #c6a55f;
+  border-radius: 13px 13px 10px 10px;
+  background: var(--ink);
   box-shadow: 0 12px 30px color-mix(in srgb, var(--shadow-navy-deep) 14%, transparent), 0 2px 5px color-mix(in srgb, var(--shadow-navy-deep) 7%, transparent);
 }
 
 .card-inner {
-  inset: 10px;
-  border: 1.5px solid var(--ink);
-  border-radius: 7px;
+  --card-paper: #fffaf0;
+  inset: 7px;
+  padding: 6px 6px 0;
+  border: 1.5px solid #d8bb78;
+  border-radius: 7px 7px 5px 5px;
   grid-template-rows: minmax(0, 1fr) 48px;
+  background-color: var(--card-paper);
+  background-image: radial-gradient(circle at 18% 16%,rgba(199,164,101,.08) 0 1px,transparent 1.7px),radial-gradient(circle at 73% 64%,rgba(14,40,100,.045) 0 .8px,transparent 1.5px),linear-gradient(105deg,rgba(255,255,255,.62),transparent 42%,rgba(216,187,120,.055));
+  background-size: 23px 21px,29px 27px,100% 100%;
+  box-shadow: inset 0 0 0 3px color-mix(in srgb,#d8bb78 20%,transparent),inset 0 0 12px rgba(130,96,43,.06);
 }
+
+.card-fox-topper {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: calc(100% - 14px);
+  width: 52%;
+  height: auto;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 4px 5px color-mix(in srgb,var(--ink) 12%,transparent));
+  transition: opacity 220ms ease;
+}
+
+.maui-card.selected .card-fox-topper { opacity: 1; }
 
 .card-number {
   position: absolute;
@@ -60,7 +85,8 @@ body {
 
 .card-image {
   grid-row: 1;
-  margin: 0;
+  z-index: 1;
+  margin: 0 0 -2px;
   border-radius: 4px 4px 0 0;
   background: var(--panel-blue-pale);
 }
@@ -75,7 +101,7 @@ body {
   position: absolute;
   inset: auto 0 0;
   height: 18%;
-  background: linear-gradient(to bottom, transparent, var(--warm));
+  background: linear-gradient(to bottom, transparent, var(--card-paper));
   pointer-events: none;
 }
 
@@ -95,15 +121,31 @@ body {
 }
 
 .card-inner > strong {
+  position: relative;
+  z-index: 2;
   grid-row: 2;
   display: grid;
   place-items: center;
-  background: var(--warm);
+  background: transparent;
   border-top: 0;
+  outline: 0;
+  box-shadow: none;
   color: var(--ink);
   font-size: clamp(16px, 4.5cqw, 20px);
   line-height: 1.1;
   font-weight: 700;
+}
+
+.card-inner > strong::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -16px;
+  right: 0;
+  left: 0;
+  height: 20px;
+  background: linear-gradient(to bottom,transparent,var(--card-paper) 82%);
+  pointer-events: none;
 }
 
 .page-dots i {
