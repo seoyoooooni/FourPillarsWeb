@@ -6,8 +6,8 @@ import { PointerEvent, useRef, useState } from "react";
 import { api, hasToken, logout, Profile } from "@/lib/api";
 
 const cards = [
-  { href: "#", image: "/images/card-compatibility-inha-v2.png", title: "궁합", number: "I" },
-  { href: "/major", image: "/images/card-major-inha-v2.png", title: "학부 추천", number: "II" },
+  { href: "/decision", image: "/images/card-compatibility-inha-v2.png", title: "운명저울", number: "I" },
+  { href: "/major", image: "/images/card-major-inha-v2.png", title: "학과 추천", number: "II" },
   { href: "/today", image: "/images/card-airplane.png", title: "오늘의 운세", number: "III" },
   { href: "/saju", image: "/images/card-lifetime-inha-v2.png", title: "평생 사주", number: "IV" },
   { href: "/campus", image: "/images/card-campus-inha-v2.png", title: "오늘의 캠퍼스 운세", number: "V" },

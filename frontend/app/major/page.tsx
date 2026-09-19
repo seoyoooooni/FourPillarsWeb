@@ -45,16 +45,16 @@ export default function MajorPage() {
   }
 
   return <main className={`app-shell wide ${result ? "result-shell" : "form-shell"}`}>
-    <Header title="학부 추천" />
+    <Header title="학과 추천" />
     {!result ? <form className="major-form maui-form" onSubmit={submit}>
       <div className="major-intro">
-        <h1>나와 잘 맞는 학부 찾기</h1>
+        <h1>나와 잘 맞는 학과 찾기</h1>
         <p>사주에 나타난 성향을 다섯 가지 학습 유형으로 살펴봐요.</p>
       </div>
       <div className="profile-row"><strong>생년월일</strong><BirthDateField value={date} calendar={calendar} leap={leap} onChange={(value, type, isLeap) => { setDate(value); setCalendar(type); setLeap(isLeap); }} /></div>
       <div className="profile-row"><strong>태어난 시</strong><BirthTimeField value={time} onChange={setTime} /></div>
       {error && <p className="error">{error}</p>}
-      <button className="primary" disabled={busy}>{busy ? "분석 중…" : "추천 학부 알아보기"}</button>
+      <button className="primary" disabled={busy}>{busy ? "분석 중…" : "추천 학과 알아보기"}</button>
     </form> : <MajorResults result={result} />}
   </main>;
 }
@@ -74,18 +74,20 @@ function MajorResults({ result }: { result: MajorRecommendation }) {
         <em>{result.traits[trait] ?? 0}</em>
       </div>)}
     </article>
-    <section className="faculty-section">
-      <div className="section-heading"><h2>가장 잘 맞는 학부</h2></div>
-      {result.recommendations.map(recommendation => <article className="faculty-card" key={recommendation.faculty}>
-        <div className="faculty-copy">
-          <h3>{recommendation.faculty}</h3>
-          <ul>{recommendation.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul>
-          {recommendation.departments.length > 0 && <div className="department-list">
-            {recommendation.departments.map(department => <span key={department.department}>{department.department}</span>)}
-          </div>}
-        </div>
-        <strong>{recommendation.score}<small>%</small></strong>
-      </article>)}
+    <section className="department-section">
+      <div className="section-heading"><h2>나와 잘 맞는 학과 TOP 3</h2></div>
+      <div className="department-results">
+        {result.recommendations.map((department, index) => <article className="department-result" key={department.department}>
+          <span className="department-rank">{index + 1}</span>
+          <div>
+            <h3>{department.department}</h3>
+            <ul className="department-reasons">{department.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul>
+            {department.admissionNote && <p className="department-admission">{department.admissionNote}</p>}
+            <a className="department-source" href={department.sourceUrl} target="_blank" rel="noopener noreferrer">인하공전 학과정보 보기 ↗</a>
+          </div>
+          <strong>{department.score}<small>점</small></strong>
+        </article>)}
+      </div>
     </section>
     <p className="major-disclaimer">{result.disclaimer}</p>
   </section>;

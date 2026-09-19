@@ -4,6 +4,7 @@ import "./fidelity.css";
 import "./forms-fidelity.css";
 import "./pickers.css";
 import "./campus-theme.css";
+import "./decision.css";
 
 export const metadata: Metadata = {
   title: "사주, 마음을 비추다",

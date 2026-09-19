@@ -12,10 +12,11 @@ export type MajorRecommendation = {
   studentType: string;
   traits: Record<string, number>;
   recommendations: {
-    faculty: string;
+    department: string;
     score: number;
     reasons: string[];
-    departments: { department: string; score: number; reasons: string[] }[];
+    sourceUrl: string;
+    admissionNote: string | null;
   }[];
   disclaimer: string;
 };

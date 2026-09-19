@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -47,8 +48,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException exception) {
-        var fieldError = exception.getBindingResult().getFieldErrors().stream().findFirst();
-        var message = fieldError.map(error -> error.getDefaultMessage()).orElse("입력값을 확인해 주세요.");
+        var error = exception.getBindingResult().getAllErrors().stream().findFirst();
+        var message = error.map(item -> item.getDefaultMessage()).orElse("입력값을 확인해 주세요.");
         return ResponseEntity.badRequest().body(new ApiErrorResponse("INVALID_INPUT", message));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    ResponseEntity<ApiErrorResponse> handleInvalidArgument(IllegalArgumentException exception) {
+        return ResponseEntity.badRequest().body(new ApiErrorResponse("INVALID_DATE", exception.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ResponseEntity<ApiErrorResponse> handleUnreadableInput(HttpMessageNotReadableException exception) {
+        return ResponseEntity.badRequest().body(new ApiErrorResponse(
+                "INVALID_DATE", "존재하지 않는 날짜입니다. 연도, 월, 일을 다시 확인해 주세요."));
     }
 }

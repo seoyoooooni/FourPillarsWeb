@@ -73,6 +73,8 @@ public class FortuneCalculationService {
 
     private final Map<String, PillarRecord> solarRecords = new LinkedHashMap<>();
     private final Map<String, PillarRecord> lunarRecords = new LinkedHashMap<>();
+    private final Set<String> lunarMonths = new java.util.HashSet<>();
+    private final Set<String> leapLunarMonths = new java.util.HashSet<>();
 
     public FortuneCalculationService() throws IOException {
         var objectMapper = new ObjectMapper().enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
@@ -80,15 +82,21 @@ public class FortuneCalculationService {
         List<PillarRecord> records = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {});
         for (var record : records) {
             solarRecords.put(record.solarDate(), record);
-            lunarRecords.put("%04d-%02d-%02d-%d".formatted(record.lunarYear(), record.lunarMonth(), record.lunarDay(), record.isLeapMonth() ? 1 : 0), record);
+            var monthKey = "%04d-%02d".formatted(record.lunarYear(), record.lunarMonth());
+            lunarMonths.add(monthKey);
+            if (record.isLeapMonth()) leapLunarMonths.add(monthKey);
+            lunarRecords.put("%s-%02d-%d".formatted(monthKey, record.lunarDay(), record.isLeapMonth() ? 1 : 0), record);
         }
     }
 
     public FortuneCalculationResponse calculate(FortuneCalculationRequest request) {
+        validateBirthDate(request.birthDate(), request.calendarType(), request.leapMonth());
         var record = request.calendarType().name().equals("SOLAR")
                 ? solarRecords.get(request.birthDate().toString())
                 : lunarRecords.get("%04d-%02d-%02d-%d".formatted(request.birthDate().getYear(), request.birthDate().getMonthValue(), request.birthDate().getDayOfMonth(), request.leapMonth() ? 1 : 0));
-        if (record == null) throw new IllegalArgumentException("지원 범위에 해당하는 만세력 데이터가 없습니다.");
+        if (record == null) throw new IllegalArgumentException(request.calendarType().name().equals("LUNAR")
+                ? "선택한 음력 날짜는 존재하지 않습니다. 날짜를 다시 확인해 주세요."
+                : "선택한 날짜는 만세력 지원 범위(1926-01-01~2027-12-31) 밖입니다.");
         var year = split(record.yearPillar()); var month = split(record.monthPillar()); var day = split(record.dayPillar());
         var hour = calculateHour(day.stem(), request.birthTime());
         var pillars = new Pillars(year.stem(), year.branch(), month.stem(), month.branch(), day.stem(), day.branch(), hour.stem(), hour.branch());
@@ -97,6 +105,22 @@ public class FortuneCalculationService {
         resultPillars.put("year", record.yearPillar()); resultPillars.put("month", record.monthPillar());
         resultPillars.put("day", record.dayPillar()); resultPillars.put("hour", hour.stem() + hour.branch());
         return new FortuneCalculationResponse(record.solarDate(), new FortuneCalculationResponse.LunarDate(record.lunarYear(), record.lunarMonth(), record.lunarDay(), record.isLeapMonth()), resultPillars, basic, analyzeStageTwo(pillars), analyzeStageThree(pillars), analyzeYongsin(basic));
+    }
+
+    public void validateBirthDate(LocalDate date, com.fourpillars.backend.profile.domain.CalendarType calendarType,
+                                  boolean leapMonth) {
+        if (calendarType == com.fourpillars.backend.profile.domain.CalendarType.SOLAR) {
+            if (leapMonth) throw new IllegalArgumentException("양력 날짜에는 윤달을 선택할 수 없습니다.");
+            return;
+        }
+        var monthKey = "%04d-%02d".formatted(date.getYear(), date.getMonthValue());
+        if (!lunarMonths.contains(monthKey)) {
+            throw new IllegalArgumentException("선택한 음력 연월은 만세력 지원 범위 밖입니다.");
+        }
+        if (leapMonth && !leapLunarMonths.contains(monthKey)) {
+            throw new IllegalArgumentException("%d년 음력 %d월에는 윤달이 없습니다. 평달을 선택해 주세요."
+                    .formatted(date.getYear(), date.getMonthValue()));
+        }
     }
 
     public TodayFortuneResponse today(BirthProfileResponse profile) {

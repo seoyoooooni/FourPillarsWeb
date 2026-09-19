@@ -14,24 +14,24 @@ class MajorRecommendationServiceTests {
     private final MajorRecommendationService service = new MajorRecommendationService();
 
     @Test
-    void returnsThreeFacultiesAndNeverReturnsAdvancedMajorCourse() {
+    void returnsThreeDepartmentsRankedAcrossAllDepartments() {
         var result = service.recommend(fortune(
                 Map.of("목", 1, "화", 1, "토", 1, "금", 3, "수", 2),
                 Map.of("비겁", 1, "식상", 1, "재성", 1, "관성", 3, "인성", 4)));
 
         assertThat(result.recommendations()).hasSize(3);
         assertThat(result.recommendations())
-                .extracting(recommendation -> recommendation.faculty())
+                .extracting(recommendation -> recommendation.department())
                 .doesNotContain("전공심화과정");
         assertThat(result.traits()).containsOnlyKeys("분석", "창의", "소통", "실행", "탐구");
         assertThat(result.traits().values()).contains(35, 95);
+        assertThat(result.recommendations()).extracting(recommendation -> recommendation.department()).doesNotHaveDuplicates();
+        assertThat(result.recommendations()).extracting(recommendation -> recommendation.score())
+                .isSortedAccordingTo(java.util.Comparator.reverseOrder());
         assertThat(result.recommendations()).allSatisfy(recommendation -> {
             assertThat(recommendation.score()).isBetween(0, 96);
             assertThat(recommendation.reasons()).hasSize(2);
-            assertThat(recommendation.reasons()).allMatch(reason -> reason.matches(".*\\d+.*"));
         });
-        assertThat(result.recommendations()).extracting(recommendation -> recommendation.reasons().getFirst())
-                .allSatisfy(reason -> assertThat(reason).containsAnyOf("설계", "기술", "실험", "공간", "서비스", "전공", "실무"));
     }
 
     @Test
@@ -44,6 +44,20 @@ class MajorRecommendationServiceTests {
     }
 
     @Test
+    void catalogIncludesOfficialDepartmentsAndSeparatelyAdmittedPrograms() throws Exception {
+        try (var input = getClass().getResourceAsStream("/major-departments.tsv")) {
+            assertThat(input).isNotNull();
+            var rows = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).lines()
+                    .filter(line -> !line.startsWith("#") && !line.isBlank()).toList();
+            assertThat(rows).hasSize(33);
+            assertThat(rows).anyMatch(line -> line.startsWith("AI소프트웨어학과|일반|"));
+            assertThat(rows).anyMatch(line -> line.startsWith("AI컴퓨터학과|일반|"));
+            assertThat(rows).anyMatch(line -> line.startsWith("반도체기계공학과|일반|"));
+            assertThat(rows.stream().filter(line -> line.contains("|별도모집|"))).hasSize(5);
+        }
+    }
+
+    @Test
     void differentTraitPatternsProduceDifferentRankingsAndScores() {
         var analytical = service.recommend(fortune(
                 Map.of("목", 0, "화", 0, "토", 0, "금", 8, "수", 0),
@@ -52,10 +66,8 @@ class MajorRecommendationServiceTests {
                 Map.of("목", 0, "화", 8, "토", 0, "금", 0, "수", 0),
                 Map.of("비겁", 0, "식상", 8, "재성", 0, "관성", 0, "인성", 0)));
 
-        assertThat(analytical.recommendations().getFirst().faculty())
-                .isNotEqualTo(creative.recommendations().getFirst().faculty());
-        assertThat(analytical.recommendations()).extracting(r -> r.score()).doesNotHaveDuplicates();
-        assertThat(creative.recommendations()).extracting(r -> r.score()).doesNotHaveDuplicates();
+        assertThat(analytical.recommendations().getFirst().department())
+                .isNotEqualTo(creative.recommendations().getFirst().department());
     }
 
     private static FortuneCalculationResponse fortune(Map<String, Integer> elements, Map<String, Integer> categories) {

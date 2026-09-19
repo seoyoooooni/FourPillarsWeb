@@ -7,6 +7,7 @@ import com.fourpillars.backend.profile.dto.BirthProfileRequest;
 import com.fourpillars.backend.profile.dto.BirthProfileResponse;
 import com.fourpillars.backend.profile.exception.ProfileNotFoundException;
 import com.fourpillars.backend.profile.repository.BirthProfileRepository;
+import com.fourpillars.backend.fortune.service.FortuneCalculationService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +17,13 @@ import java.util.UUID;
 public class BirthProfileService {
     private final BirthProfileRepository profileRepository;
     private final UserAccountRepository userRepository;
+    private final FortuneCalculationService fortuneCalculationService;
 
-    public BirthProfileService(BirthProfileRepository profileRepository, UserAccountRepository userRepository) {
+    public BirthProfileService(BirthProfileRepository profileRepository, UserAccountRepository userRepository,
+                               FortuneCalculationService fortuneCalculationService) {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
+        this.fortuneCalculationService = fortuneCalculationService;
     }
 
     @Transactional(readOnly = true)
@@ -30,6 +34,7 @@ public class BirthProfileService {
 
     @Transactional
     public BirthProfileResponse save(UUID userId, BirthProfileRequest request) {
+        fortuneCalculationService.validateBirthDate(request.birthDate(), request.calendarType(), request.leapMonth());
         var profile = profileRepository.findById(userId).orElseGet(() ->
                 new BirthProfile(userRepository.getReferenceById(userId)));
         profile.update(request.displayName(), request.birthDate(), request.birthTime(), request.calendarType(),
