@@ -1,6 +1,5 @@
 /* Primary actions share one visual language across every flow. */
 .primary,
-.outline,
 .link-button,
 .maui-form .primary,
 .wizard-actions .primary,
@@ -11,14 +10,13 @@
   border: 1px solid var(--accent);
   border-radius: 999px;
   background: var(--accent);
-  color: #fff;
-  box-shadow: 0 8px 20px #0e286426;
+  color: var(--warm);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 15%, transparent);
   font-weight: 600;
   cursor: pointer;
 }
 
 .primary:disabled,
-.outline:disabled,
 .auth-submit:disabled,
 .decision-draw:disabled {
   opacity: .35;
@@ -37,53 +35,35 @@
 .picker-confirm {
   border: 0;
   background: var(--accent);
-  color: #fff;
-  box-shadow: 0 6px 16px #0e286426;
+  color: var(--warm);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--ink) 15%, transparent);
 }
 
 .wizard-question label {
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--warm);
 }
 
 .wizard-question label.selected {
   border: 1px solid var(--accent);
   background: var(--accent);
-  color: #fff;
+  color: var(--warm);
   font-weight: 600;
 }
 
 body,
 .app-shell,
-.home,
 .wide,
 .content-shell,
 .result-shell,
 .form-shell,
 .auth-shell,
 .maui-home {
-  background: radial-gradient(ellipse at 50% 50%, #ffffff 0%, #f5f9fe 55%, #eaf2fb 100%);
-}
-
-.major-result-back {
-  position: absolute;
-  z-index: 3;
-  top: calc(18px + env(safe-area-inset-top));
-  left: 20px;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  font-size: 34px;
-  font-weight: 300;
-  line-height: 1;
-  cursor: pointer;
+  background: radial-gradient(ellipse at 50% 50%, var(--warm) 0%, var(--gradient-blue-2) 55%, var(--gradient-blue-3) 100%);
 }
 
 .maui-drawer {
-  background: radial-gradient(ellipse at 50% 45%, #ffffff 0%, #f5f9fe 55%, #eaf2fb 100%);
+  background: radial-gradient(ellipse at 50% 45%, var(--warm) 0%, var(--gradient-blue-2) 55%, var(--gradient-blue-3) 100%);
 }
 
 /* Shared by every page through BackButton.tsx. */

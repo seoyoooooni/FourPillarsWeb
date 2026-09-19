@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "./styles/colors.css";
 import "./styles/globals.css";
 import "./styles/fidelity.css";
 import "./styles/forms-fidelity.css";

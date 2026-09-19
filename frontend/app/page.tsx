@@ -12,7 +12,6 @@ const cards = [
   { href: "/major", image: "/images/card-major-inha-v2.png", title: "학과 추천", number: "II" },
   { href: "/today", image: "/images/card-airplane.png", title: "오늘의 운세", number: "III" },
   { href: "/saju", image: "/images/card-lifetime-inha-v2.png", title: "평생 사주", number: "IV" },
-  { href: "/campus", image: "/images/card-campus-inha-v2.png", title: "오늘의 캠퍼스 운세", number: "V" },
 ];
 const angles = [-11, -5, 0, 5, 11];
 const offsets = [
@@ -47,17 +46,9 @@ export default function Home() {
   if (!loggedIn) return <main className="app-shell auth-shell"><SignupOnboarding /></main>;
   return <main className="maui-home">
     <button className="maui-menu-button" onClick={openMenu} aria-label="메뉴">☰</button>
-    <svg className="brand-logo" viewBox="0 0 88 88" role="img" aria-label="펼친 책 위에 앉은 부엉이 마스코트 로고">
-      <path d="M22 20 32 10 34 24Z" fill="currentColor"/>
-      <path d="M66 20 56 10 54 24Z" fill="currentColor"/>
-      <circle cx="44" cy="38" r="20" fill="none" stroke="currentColor" strokeWidth="3.5"/>
-      <path d="M44 20 45.5 24 49.5 25.5 45.5 27 44 31 42.5 27 38.5 25.5 42.5 24Z" fill="currentColor"/>
-      <ellipse cx="35" cy="40" rx="4.5" ry="5.5" fill="currentColor"/>
-      <ellipse cx="53" cy="40" rx="4.5" ry="5.5" fill="currentColor"/>
-      <path d="M41 47 47 47 44 52Z" fill="currentColor"/>
-      <path d="M25 42Q19 48 23 56" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M63 42Q69 48 65 56" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M38 58v7M50 58v7" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+    <svg className="brand-logo" viewBox="0 0 88 88" role="img" aria-label="별과 펼친 책 로고">
+      <path d="M44 8 46 29 58 20 49 32 66 32 49 35 58 47 46 38 44 59 42 38 30 47 39 35 22 32 39 32 30 20 42 29Z" fill="currentColor"/>
+      <path d="M12 45h2m60 0h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
       <path d="M20 65c9-1.5 17-.4 24 3 7-3.4 15-4.5 24-3M20 70c9-1.5 17-.4 24 3 7-3.4 15-4.5 24-3M20 75c9-1.5 17-.4 24 3 7-3.4 15-4.5 24-3M44 68v10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
     <div className="maui-deck" onPointerDown={pointerDown} onPointerUp={pointerUp} onPointerCancel={pointerCancel}>

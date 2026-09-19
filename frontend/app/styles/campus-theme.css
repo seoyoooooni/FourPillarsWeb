@@ -1,23 +1,14 @@
-:root {
-  --cream: #f5f8fc;
-  --warm: #ffffff;
-  --ink: #0e2864;
-  --muted: #647795;
-  --line: #cbd8e8;
-  --accent: #0e2864;
-}
-
 html {
-  background: #e8eff8;
+  background: var(--page-backdrop-blue);
 }
 
 body {
   background: var(--cream);
-  box-shadow: 0 0 48px #0e28641c;
+  box-shadow: 0 0 48px color-mix(in srgb, var(--ink) 11%, transparent);
 }
 
 .maui-home {
-  background: radial-gradient(ellipse at 50% 50%, #ffffff 0%, #f5f9fe 55%, #eaf2fb 100%);
+  background: radial-gradient(ellipse at 50% 50%, var(--warm) 0%, var(--gradient-blue-2) 55%, var(--gradient-blue-3) 100%);
 }
 
 .maui-menu-button {
@@ -36,8 +27,8 @@ body {
   aspect-ratio: 1 / 1.72;
   border: 0;
   border-radius: 15px;
-  background: #fff;
-  box-shadow: 0 12px 30px #12356624, 0 2px 5px #12356612;
+  background: var(--warm);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--shadow-navy-deep) 14%, transparent), 0 2px 5px color-mix(in srgb, var(--shadow-navy-deep) 7%, transparent);
 }
 
 .card-inner {
@@ -58,8 +49,8 @@ body {
   font-size: 18px;
   font-weight: 600;
   line-height: 1;
-  color: rgba(255, 255, 255, .92);
-  text-shadow: 0 1px 6px rgba(0, 0, 0, .35);
+  color: color-mix(in srgb, var(--warm) 92%, transparent);
+  text-shadow: 0 1px 6px color-mix(in srgb, var(--black) 35%, transparent);
 }
 
 .card-number::before,
@@ -71,7 +62,7 @@ body {
   grid-row: 1;
   margin: 0;
   border-radius: 4px 4px 0 0;
-  background: #e8f0f9;
+  background: var(--panel-blue-pale);
 }
 
 .card-image img {
@@ -84,7 +75,7 @@ body {
   position: absolute;
   inset: auto 0 0;
   height: 18%;
-  background: linear-gradient(to bottom, transparent, #fff);
+  background: linear-gradient(to bottom, transparent, var(--warm));
   pointer-events: none;
 }
 
@@ -94,7 +85,7 @@ body {
   z-index: 2;
   inset: 0 0 auto;
   height: 24%;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, .24), transparent);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--black) 24%, transparent), transparent);
   pointer-events: none;
 }
 
@@ -107,7 +98,7 @@ body {
   grid-row: 2;
   display: grid;
   place-items: center;
-  background: #fff;
+  background: var(--warm);
   border-top: 0;
   color: var(--ink);
   font-size: clamp(16px, 4.5cqw, 20px);
@@ -116,7 +107,7 @@ body {
 }
 
 .page-dots i {
-  background: #b3c5dc;
+  background: var(--dot-inactive-blue);
 }
 
 .page-dots i.active {
@@ -124,11 +115,11 @@ body {
 }
 
 .maui-dim {
-  background: #0e286452;
+  background: color-mix(in srgb, var(--ink) 32%, transparent);
 }
 
 .maui-drawer {
-  background: #fff;
+  background: var(--warm);
 }
 
 .results article {
@@ -137,19 +128,11 @@ body {
 
 .element i,
 .element b {
-  background: #ccd9e8;
-}
-
-.results .pillars div {
-  background: #eaf1f9;
-}
-
-.score-grid i {
-  background: #e1eaf5;
+  background: var(--track-blue);
 }
 
 .auth-input input::placeholder {
-  color: #8192a9;
+  color: var(--placeholder-blue);
 }
 
 .major-form > .primary,
@@ -157,12 +140,12 @@ body {
 .profile-save,
 .picker-confirm {
   background: var(--ink);
-  color: #fff;
-  box-shadow: 0 8px 20px #0e286426;
+  color: var(--warm);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 15%, transparent);
 }
 
 @media (min-width: 800px) {
   .maui-home {
-    background: radial-gradient(ellipse at 50% 50%, #ffffff 0%, #f5f9fe 55%, #eaf2fb 100%);
+    background: radial-gradient(ellipse at 50% 50%, var(--warm) 0%, var(--gradient-blue-2) 55%, var(--gradient-blue-3) 100%);
   }
 }

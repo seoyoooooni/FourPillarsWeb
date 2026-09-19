@@ -1,0 +1,60 @@
+:root {
+  /* 기본 테마 (실제로 화면에 렌더링되는 테마) */
+  --cream: #f5f8fc;
+  --warm: #ffffff;
+  --ink: #0e2864;
+  --muted: #647795;
+  --line: #cbd8e8;
+  --accent: #0e2864;
+
+  /* 그림자, 오버레이에 쓰는 무채색 */
+  --black: #000000;
+  --shadow-black: #1c1b19;
+  --shadow-frame: #241d14;
+  --shadow-navy-deep: #123566;
+
+  /* 파란 테마 위에 여전히 쓰이는 웜톤 색상 */
+  --page-backdrop: #e7e0d2;
+  --panel-warm: #f0ebe1;
+  --track-warm: #e3dfd7;
+  --track-neutral: #cbc6bc;
+  --divider-soft: #ded8cc;
+  --divider-faint: #e2ddd4;
+  --divider-faint-2: #e8e5de;
+  --dot-inactive: #aaa49a;
+  --gradient-warm-1: #f5f0e5;
+  --gradient-warm-2: #f1ebdd;
+  --gradient-warm-3: #e9e1d2;
+  --trait-track: #d7d1c6;
+  --placeholder-warm: #9c968c;
+  --drawer-profile-muted: #9b968e;
+
+  /* 파란 톤 표면 색상 */
+  --page-backdrop-blue: #e8eff8;
+  --panel-blue-pale: #e8f0f9;
+  --track-blue: #ccd9e8;
+  --dot-inactive-blue: #b3c5dc;
+  --placeholder-blue: #8192a9;
+  --panel-border-blue: #dbe4ef;
+  --wheel-highlight: #eaf1f9;
+  --wheel-text-muted: #91a0b4;
+  --gradient-blue-2: #f5f9fe;
+  --gradient-blue-3: #eaf2fb;
+  --progress-track: #e1e8f2;
+
+  /* 캘린더(FortuneCalendar) 컴포넌트 */
+  --calendar-hand: #0b3d91;
+  --calendar-icon: #71829a;
+  --calendar-muted: #718096;
+  --calendar-day-inactive: #a7b0bc;
+  --calendar-today-ring: #b9c8da;
+  --calendar-summary-text: #66758a;
+  --calendar-radar-text: #65748a;
+
+  /* 특정 컴포넌트 전용 색상 */
+  --scale-highlight: #dfe5f3;
+
+  /* 의미 기반 색상(에러 등) */
+  --error: #784b45;
+  --error-strong: #b33b35;
+}

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import Image from "next/image";
+import { HandDrawnBorder } from "@/components/HandDrawnBorder";
 
 type CheckedDay = { date:string; score:number; annualRank:number; wealth:number; love:number; health:number; career:number; relationships:number; study:number };
 type CalendarResponse = { year:number; month:number; checkedDays:CheckedDay[] };
@@ -37,10 +38,10 @@ export function FortuneCalendar() {
   function move(delta:number){setSelected(undefined);setCursor(value=>{const date=new Date(value.year,value.month-1+delta,1);return{year:date.getFullYear(),month:date.getMonth()+1}})}
 
   return <section className="fortune-calendar" aria-label="오늘의 운세 확인 기록" onPointerDown={event=>event.stopPropagation()}>
-    <svg className="calendar-hand-border" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <HandDrawnBorder className="calendar-hand-border">
       <path d="M6 0 C20 0 34 0 49 0 C65 0 79 0 93.5 0 C96 1 97 3.8 96.6 8 C97.2 27 96 43 96.5 60 C96.9 74 95.8 87 96.2 93.5 C96.3 96.2 94.9 97.4 92.2 97.2 C77 96.6 65 98 50 97.3 C35 98 22 96.8 7.2 97.4 C4.6 97.5 3.4 95.7 3.6 92.8 C3 77 4.2 62 3.6 47 C3.2 32 4.2 19 3.5 7.7 C3.2 3.8 4.1 1 6 0 Z"/>
       <path className="calendar-hand-top-line" d="M6 0 C20 0 34 0 49 0 C65 0 79 0 93.5 0"/>
-    </svg>
+    </HandDrawnBorder>
     <div className="calendar-mascot" aria-hidden="true">
       <Image src="/images/mascot-calendar-holder-watercolor.png" alt="" width={1536} height={1024}/>
     </div>

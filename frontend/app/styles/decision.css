@@ -20,7 +20,7 @@
 .decision-scale.is-drawing .scale-balance{animation:scale-sway 1.8s ease-in-out both}
 .decision-scale.is-a .scale-balance{transform:rotate(-9deg)}
 .decision-scale.is-b .scale-balance{transform:rotate(9deg)}
-.decision-scale.is-a .scale-pan-a .scale-bowl-fill,.decision-scale.is-b .scale-pan-b .scale-bowl-fill{fill:#dfe5f3}
+.decision-scale.is-a .scale-pan-a .scale-bowl-fill,.decision-scale.is-b .scale-pan-b .scale-bowl-fill{fill:var(--scale-highlight)}
 @keyframes scale-sway{0%{transform:rotate(0)}20%{transform:rotate(-8deg)}42%{transform:rotate(7deg)}64%{transform:rotate(-5deg)}82%{transform:rotate(4deg)}100%{transform:rotate(0)}}
 .decision-result{display:flex;min-height:94px;padding:8px 20px;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 .decision-result>strong{max-width:100%;margin:0 0 5px;overflow-wrap:anywhere;font-size:27px;line-height:1.3}

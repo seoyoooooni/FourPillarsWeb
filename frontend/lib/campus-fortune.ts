@@ -1,70 +1,20 @@
-"use client";
+export type CampusMetricKey = "study" | "relationships" | "health";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Header } from "@/components/Header";
-import { api, hasToken } from "@/lib/api";
-
-type CampusFortune = {
-  fortune: {
-    overall: number;
-    health: number;
-    relationships: number;
-    study: number;
-    todayTenGod: string;
-  };
+export type CampusFortune = {
+  overall: number;
+  study: number;
+  relationships: number;
+  health: number;
+  todayTenGod: string;
 };
 
-type CampusMetricKey = "study" | "relationships" | "health";
-
-const campusFields: [CampusMetricKey, string, string][] = [
+export const campusFields: [CampusMetricKey, string, string][] = [
   ["study", "학업운", "수업과 과제에 집중하기 좋은 정도예요."],
   ["relationships", "관계운", "친구와 팀원 사이의 흐름을 보여줘요."],
   ["health", "컨디션", "오늘 활동할 수 있는 에너지의 흐름이에요."],
 ];
 
-export default function CampusPage() {
-  const router = useRouter();
-  const [data, setData] = useState<CampusFortune>();
-  const [error, setError] = useState("");
-  const todayKey = localDateKey();
-
-  useEffect(() => {
-    if (!hasToken()) {
-      router.replace("/login");
-      return;
-    }
-    api<CampusFortune>("/api/fortune/today", {}, true).then(setData).catch((e) => setError(e.message));
-  }, [router]);
-
-  return <main className="app-shell content-shell">
-    <Header title="오늘의 캠퍼스 운세" />
-    {error ? <section className="empty-state"><p>{error}</p><Link className="primary link-button" href="/profile">설정하기</Link></section>
-      : !data ? <div className="loading">오늘의 캠퍼스 흐름을 살펴보는 중…</div>
-      : <section className="campus-result">
-        <div className="campus-hero">
-          <span className="result-meta">{new Intl.DateTimeFormat("ko-KR", { month: "long", day: "numeric", weekday: "long" }).format(new Date())}</span>
-          <p>오늘의 캠퍼스 지수</p>
-          <strong>{data.fortune.overall}</strong><em>점</em>
-          <small>{campusMessage(data.fortune.overall, todayKey)}</small>
-        </div>
-        <div className="campus-fortunes">
-          {campusFields.map(([key, label, description]) => <article key={key}>
-            <div><h2>{label}</h2><strong>{data.fortune[key]}</strong></div>
-            <i><b style={{ width: `${data.fortune[key]}%` }} /></i>
-            <p>{description}</p>
-          </article>)}
-        </div>
-        <article className="campus-tip">
-          <h2>오늘의 한마디</h2>
-          <p>{dailyTip(data.fortune, todayKey)}</p>
-        </article>
-      </section>}
-  </main>;
-}
-
-function campusMessage(score: number, dateKey: string) {
+export function campusMessage(score: number, dateKey: string) {
   const messages = score >= 80 ? [
     "해보고 싶던 일에 먼저 손을 들어봐도 좋은 날이에요.",
     "작은 도전이 기대보다 좋은 반응으로 돌아올 수 있어요.",
@@ -89,7 +39,7 @@ function campusMessage(score: number, dateKey: string) {
   return pick(messages, `${dateKey}-${score}`);
 }
 
-function dailyTip(fortune: CampusFortune["fortune"], dateKey: string) {
+export function campusDailyTip(fortune: CampusFortune, dateKey: string) {
   const ranked = campusFields
     .map(([key]) => ({ key, score: fortune[key] as number }))
     .sort((a, b) => b.score - a.score);
@@ -162,7 +112,7 @@ function pick<T>(items: T[], seed: string) {
   return items[Math.abs(hash) % items.length];
 }
 
-function localDateKey() {
+export function localDateKey() {
   const now = new Date();
   return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
 }

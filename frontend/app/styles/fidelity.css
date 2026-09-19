@@ -1,7 +1,6 @@
 .page-header{width:min(100%,720px);height:calc(62px + env(safe-area-inset-top));justify-content:flex-start;margin:0 auto;padding:env(safe-area-inset-top) 10px 0}
-.page-header .icon-button{width:32px;height:42px;padding:0;font-size:34px;line-height:1}
 .results{width:min(100%,680px);margin:0 auto;padding:18px 24px calc(36px + env(safe-area-inset-bottom));display:block}
-.results article{background:transparent;border:0;border-radius:0;padding:0 0 24px;margin:0 0 26px;box-shadow:none;border-bottom:1px solid #e8e5de}
+.results article{background:transparent;border:0;border-radius:0;padding:0 0 24px;margin:0 0 26px;box-shadow:none;border-bottom:1px solid var(--divider-faint-2)}
 .results h2{font-size:20px;margin:0 0 14px}
 .result-guide{margin:4px 0 42px;text-align:center;color:var(--muted);font-size:13px}
 .pillar-table{display:grid;grid-template-columns:42px repeat(4,minmax(0,1fr));grid-template-rows:28px 42px 42px;align-items:center;text-align:center}
@@ -13,7 +12,7 @@
 .result-explanation{margin:10px 0 0 12px;color:var(--muted);font-size:14px;line-height:1.4}
 .day-master-section button{display:block;min-width:42px;padding:0;border:0;background:transparent;text-align:left;font-size:18px;font-weight:900;cursor:pointer}
 .element-section .element{width:100%;height:39px;padding:0;border:0;background:transparent;cursor:pointer}
-.element i{height:3px;border-radius:0;background:#cbc6bc}.element b{border-radius:0;background:#cbc6bc}.element b.is-maximum{background:var(--accent)}
+.element i{height:3px;border-radius:0;background:var(--track-neutral)}.element b{border-radius:0;background:var(--track-neutral)}.element b.is-maximum{background:var(--accent)}
 details{border:0;padding:6px 0 10px}
 summary{gap:4px;font-size:15px}
 details p{margin:7px 0 0 12px;line-height:1.4}
