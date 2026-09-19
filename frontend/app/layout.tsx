@@ -1,15 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import "./globals.css";
-import "./fidelity.css";
-import "./forms-fidelity.css";
-import "./pickers.css";
-import "./campus-theme.css";
-import "./decision.css";
-import "./buttons.css";
+import "./styles/globals.css";
+import "./styles/fidelity.css";
+import "./styles/forms-fidelity.css";
+import "./styles/pickers.css";
+import "./styles/campus-theme.css";
+import "./styles/decision.css";
+import "./styles/buttons.css";
 
 export const metadata: Metadata = {
-  title: "사주, 마음을 비추다",
-  description: "생년월일과 출생시간으로 살펴보는 나의 사주와 오늘의 흐름",
+  title: "사주",
 };
 
 export const viewport: Viewport = {
