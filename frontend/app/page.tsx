@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { PointerEvent, useRef, useState } from "react";
+import { PointerEvent, useEffect, useRef, useState } from "react";
 import { api, hasToken, logout, Profile } from "@/lib/api";
+import { SignupOnboarding } from "@/components/SignupOnboarding";
 
 const cards = [
   { href: "/decision", image: "/images/card-compatibility-inha-v2.png", title: "운명저울", number: "I" },
@@ -25,6 +26,7 @@ const alphas = [.2,.38,1,.38,.2];
 
 export default function Home() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [focus, setFocus] = useState(2); const [menu, setMenu] = useState(false); const [profile,setProfile]=useState<Profile>(); const [drawerX,setDrawerX]=useState(0); const [drawerDragging,setDrawerDragging]=useState(false);
   const startX = useRef(0); const didSwipe=useRef(false); const drawerStartX=useRef<number|null>(null); const loggedIn = hasToken();
   function cardClick(index:number) { if(didSwipe.current){didSwipe.current=false;return} if(cards[index].href !== "#") router.push(cards[index].href); }
@@ -35,6 +37,9 @@ export default function Home() {
   function drawerDown(e:PointerEvent<HTMLElement>){drawerStartX.current=e.clientX-drawerX;setDrawerDragging(true)}
   function drawerMove(e:PointerEvent<HTMLElement>){if(drawerStartX.current!==null)setDrawerX(Math.max(-286,Math.min(0,e.clientX-drawerStartX.current)))}
   function drawerUp(){drawerStartX.current=null;setDrawerDragging(false);if(drawerX<=-71.5)closeMenu();else setDrawerX(0)}
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <main className="app-shell auth-shell" />;
+  if (!loggedIn) return <main className="app-shell auth-shell"><SignupOnboarding /></main>;
   return <main className="maui-home">
     <button className="maui-menu-button" onClick={()=>{setMenu(true);if(loggedIn)api<Profile>("/api/profile",{},true).then(setProfile).catch(()=>setProfile(undefined))}} aria-label="메뉴">☰</button>
     <svg className="brand-logo" viewBox="0 0 88 88" role="img" aria-label="별과 펼친 책 로고">

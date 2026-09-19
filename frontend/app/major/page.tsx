@@ -2,8 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { Header } from "@/components/Header";
+import { useRouter } from "next/navigation";
 import { api, hasToken, MajorRecommendation, Profile } from "@/lib/api";
+import { BackButton } from "@/components/BackButton";
 
 const aptitudeOrder = ["이론·분석", "설계·창작", "실험·연구", "제작·정비", "데이터·디지털", "협업·소통", "서비스·현장", "운영·관리"];
 const questions = [
@@ -17,6 +18,7 @@ const questions = [
 ] as const;
 
 export default function MajorPage() {
+  const router = useRouter();
   const [result, setResult] = useState<MajorRecommendation>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -24,6 +26,7 @@ export default function MajorPage() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [step, setStep] = useState(0);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     if (!hasToken()) { setProfileLoading(false); return; }
@@ -64,11 +67,12 @@ export default function MajorPage() {
   }
 
   return <main className={`app-shell wide ${result ? "result-shell" : "form-shell"}`}>
-    <Header title="학과 추천" />
+    {profile && !result && !started && <BackButton />}
     {profileLoading ? <div className="loading">프로필을 불러오는 중…</div> : !profile ? <section className="empty-state major-profile-required">
       <h1>프로필 설정이 필요해요</h1><p>학과 추천은 프로필에 저장된 생년월일과 태어난 시를 사용해요.</p>
       <Link className="primary link-button" href={hasToken() ? "/profile" : "/login"}>{hasToken() ? "프로필 설정하기" : "로그인하기"}</Link>
     </section> : !result ? <form className="major-form major-wizard maui-form" onSubmit={submit}>
+      {!started ? <><section className="major-question-intro"><h1>사주와 약간의 질문으로<br />잘 맞는 학과를 추천해 드릴게요.</h1></section><div className="wizard-actions intro-action"><button type="button" className="primary" onClick={() => setStarted(true)}>좋아요!</button></div></> : <>
       <section className="preference-questions wizard-question">
         <div className="wizard-progress" aria-label={`질문 진행률 ${step + 1}/${questions.length}`}><i><b style={{ width: `${((step + 1) / questions.length) * 100}%` }} /></i></div>
         <fieldset key={questions[step].text}><legend>{questions[step].text}</legend><div>{questions[step].options.map(([label, axis]) => <label key={axis} className={answers[step] === axis ? "selected" : ""}>
@@ -78,7 +82,8 @@ export default function MajorPage() {
       {error && <p className="error">{error}</p>}
       <div className="wizard-actions"><button type="button" className="secondary" disabled={step === 0} onClick={() => setStep(step - 1)}>이전</button>
         {step < questions.length - 1 ? <button type="button" className="primary" disabled={!answers[step]} onClick={() => setStep(step + 1)}>다음</button> : <button className="primary" disabled={busy || !answers[step]}>{busy ? "분석 중…" : "추천 결과 보기"}</button>}</div>
-    </form> : <MajorResults result={result} />}
+      </>}
+    </form> : <><BackButton onClick={() => router.push("/")} label="메인 화면으로 이동" /><MajorResults result={result} /></>}
   </main>;
 }
 

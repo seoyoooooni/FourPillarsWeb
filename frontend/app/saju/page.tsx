@@ -1,14 +1,13 @@
 "use client";
-import { FormEvent, useEffect, useState } from "react"; import { Header } from "@/components/Header"; import { api, Calculation, hasToken, Profile } from "@/lib/api";
-import { BirthDateField, BirthTimeField } from "@/components/BirthPickers";
+import Link from "next/link";
+import { useEffect, useState } from "react"; import { Header } from "@/components/Header"; import { api, Calculation, hasToken, Profile } from "@/lib/api";
 import { explanationFor } from "@/lib/saju-explanations";
 const names: Record<string, string> = { year: "연", month: "월", day: "일", hour: "시", year_gan: "연간", month_gan: "월간", day_gan: "일간", hour_gan: "시간", year_ji: "연지", month_ji: "월지", day_ji: "일지", hour_ji: "시지" };
 const textMap = (v: Record<string, string>) => Object.entries(v).map(([k, value]) => `${names[k] ?? k} ${value}`).join(" · ");
 export default function SajuPage() {
-  const [result, setResult] = useState<Calculation>(); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);const [date,setDate]=useState("2000-01-01");const [time,setTime]=useState("12:00");const [calendar,setCalendar]=useState<"SOLAR"|"LUNAR">("SOLAR");const [leap,setLeap]=useState(false);
-  useEffect(()=>{if(!hasToken())return;api<Profile>("/api/profile",{},true).then(profile=>{setDate(profile.birthDate);setTime(profile.birthTime.slice(0,5));setCalendar(profile.calendarType);setLeap(profile.leapMonth)}).catch(()=>{})},[]);
-  async function submit(e: FormEvent<HTMLFormElement>) { e.preventDefault(); setBusy(true); setError(""); try { setResult(await api<Calculation>("/api/fortune/calculate", { method: "POST", body: JSON.stringify({ birthDate:date, birthTime:`${time}:00`, calendarType:calendar, leapMonth:leap }) })); } catch (x) { setError(x instanceof Error ? x.message : "계산에 실패했습니다."); } finally { setBusy(false); } }
-  return <main className={`app-shell wide ${result ? "result-shell" : "form-shell"}`}><Header title="평생 사주" />{!result ? <form className="saju-form maui-form" onSubmit={submit}><div className="profile-row"><strong>생년월일</strong><BirthDateField value={date} calendar={calendar} leap={leap} onChange={(v,c,l)=>{setDate(v);setCalendar(c);setLeap(l)}}/></div><div className="profile-row"><strong>태어난 시</strong><BirthTimeField value={time} onChange={setTime}/></div>{error && <p className="error">{error}</p>}<button className="primary" disabled={busy}>{busy ? "계산 중…" : "사주 계산하기"}</button></form> : <Results result={result} />}</main>;
+  const [result, setResult] = useState<Calculation>(); const [error, setError] = useState("");
+  useEffect(()=>{if(!hasToken()){setError("로그인이 필요합니다.");return}api<Profile>("/api/profile",{},true).then(profile=>api<Calculation>("/api/fortune/calculate",{method:"POST",body:JSON.stringify({birthDate:profile.birthDate,birthTime:profile.birthTime,calendarType:profile.calendarType,leapMonth:profile.leapMonth})})).then(setResult).catch(x=>setError(x instanceof Error?x.message:"계산에 실패했습니다."))},[]);
+  return <main className={`app-shell wide ${result ? "result-shell" : "form-shell"}`}><Header title="평생 사주" />{error ? <section className="empty-state"><p>{error}</p><Link className="primary link-button" href="/profile">프로필 설정하기</Link></section> : !result ? <div className="loading">프로필 사주를 계산하는 중…</div> : <Results result={result} />}</main>;
 }
 function Results({ result }: { result: Calculation }) {
   const sections = [

@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { login, signup } from "@/lib/api";
+import { BackButton } from "@/components/BackButton";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
@@ -38,7 +39,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   return <section className="auth-panel" aria-label={mode === "login" ? "로그인" : "회원가입"}>
-    <button className="auth-back" type="button" onClick={goBack} aria-label="뒤로 가기">‹</button>
+    <BackButton onClick={goBack} />
     <form className="auth-step-form" onSubmit={submit} noValidate>
       <div className="auth-fields">
         {step === "email" ? <label className={`auth-input ${error ? "error" : ""}`}>
