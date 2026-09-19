@@ -10,7 +10,7 @@
 .decision-or{margin:0;text-align:center;color:var(--muted);font-size:13px}
 .decision-draw{height:52px;margin-top:14px;border:1px solid var(--ink);border-radius:999px;background:var(--ink);color:var(--cream);font:inherit;font-size:17px;font-weight:600;cursor:pointer}
 .decision-draw:disabled{opacity:.38;cursor:default}
-.decision-scale{width:min(100%,500px);margin:12px auto 0;color:#25345e}
+.decision-scale{width:min(100%,500px);margin:12px auto 0;color:var(--ink)}
 .decision-scale svg{display:block;width:100%;height:auto;overflow:visible}
 .scale-star,.scale-column,.scale-foot,.scale-pivot{fill:currentColor}
 .scale-line{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}

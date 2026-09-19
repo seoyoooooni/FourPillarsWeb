@@ -1,10 +1,10 @@
 :root {
   --cream: #f5f8fc;
   --warm: #ffffff;
-  --ink: #0e2f63;
+  --ink: #0e2864;
   --muted: #647795;
   --line: #cbd8e8;
-  --accent: #2f6d68;
+  --accent: #0e2864;
 }
 
 html {
@@ -13,7 +13,7 @@ html {
 
 body {
   background: var(--cream);
-  box-shadow: 0 0 48px #0e2f631c;
+  box-shadow: 0 0 48px #0e28641c;
 }
 
 .maui-home {
@@ -124,7 +124,7 @@ body {
 }
 
 .maui-dim {
-  background: #0e2f6352;
+  background: #0e286452;
 }
 
 .maui-drawer {
@@ -158,7 +158,7 @@ body {
 .picker-confirm {
   background: var(--ink);
   color: #fff;
-  box-shadow: 0 8px 20px #0e2f6326;
+  box-shadow: 0 8px 20px #0e286426;
 }
 
 @media (min-width: 800px) {
