@@ -41,6 +41,7 @@ export default function DecisionPage() {
     <Header title="운명저울" />
     <section className="decision-content">
       <div className="decision-intro">
+        <div className="decision-guide"><img src="/images/mascot-thinking.png" alt="선택지를 고민하는 여우 마스코트" /></div>
         <h1>운명저울</h1>
         <p>두 가지 선택을 저울에 올려보세요.</p>
       </div>

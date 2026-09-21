@@ -1,6 +1,8 @@
 .decision-content{width:min(100%,560px);margin:0 auto;padding:32px 24px calc(56px + env(safe-area-inset-bottom))}
 .decision-intro{text-align:center}
-.decision-intro h1{margin:12px 0 9px;font-size:36px;letter-spacing:-1.5px}
+.decision-guide{position:relative;display:grid;width:126px;height:126px;margin:0 auto 2px;place-items:center;border-radius:50%;background:radial-gradient(circle,var(--panel-blue-pale),transparent 70%)}
+.decision-guide::after{content:"✦";position:absolute;top:12px;right:8px;color:#b99a55;font-size:10px}.decision-guide img{width:100px;height:auto;filter:drop-shadow(0 7px 10px color-mix(in srgb,var(--shadow-navy-deep) 10%,transparent))}
+.decision-intro h1{margin:12px 0 9px;font-size:36px;font-weight:600;letter-spacing:-1.5px}
 .decision-intro p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
 .decision-form{display:grid;gap:10px;margin-top:28px}
 .decision-form label{font-size:14px;font-weight:600}

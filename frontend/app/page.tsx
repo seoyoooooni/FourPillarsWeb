@@ -12,7 +12,7 @@ const cards = [
   { href: "/major", image: "/images/card-major-inha-v2.png", title: "학과 추천", number: "II" },
   { href: "/today", image: "/images/card-airplane.png", title: "오늘의 운세", number: "III" },
   { href: "/saju", image: "/images/card-lifetime-inha-v2.png", title: "평생 사주", number: "IV" },
-  { href: "#", image: "/images/card-campus-inha-v2.png", title: "오늘의 캠퍼스 운세", number: "V" },
+  { href: "/team", image: "/images/card-campus-inha-v2.png", title: "팀플 궁합", number: "V" },
 ];
 const angles = [-11, -5, 0, 5, 11];
 const offsets = [

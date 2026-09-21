@@ -69,15 +69,16 @@ export default function MajorPage() {
   return <main className={`app-shell wide ${result ? "result-shell" : "form-shell"}`}>
     {profile && !result && !started && <BackButton />}
     {profileLoading ? <div className="loading">프로필을 불러오는 중…</div> : !profile ? <section className="empty-state major-profile-required">
+      <img className="empty-state-mascot" src="/images/mascot-guide-talking.png" alt="" aria-hidden="true" />
       <h1>프로필 설정이 필요해요</h1><p>학과 추천은 프로필에 저장된 생년월일과 태어난 시를 사용해요.</p>
       <Link className="primary link-button" href={hasToken() ? "/profile" : "/login"}>{hasToken() ? "프로필 설정하기" : "로그인하기"}</Link>
     </section> : !result ? <form className="major-form major-wizard maui-form" onSubmit={submit}>
-      {!started ? <><section className="major-question-intro"><h1>사주와 약간의 질문으로<br />잘 맞는 학과를 추천해 드릴게요.</h1></section><div className="wizard-actions intro-action"><button type="button" className="primary" onClick={() => setStarted(true)}>좋아요!</button></div></> : <>
+      {!started ? <><section className="major-question-intro"><div className="major-intro-aura"><img src="/images/mascot-major-clipboard.png" alt="질문지를 들고 학과 탐색을 안내하는 여우 마스코트" /></div><h1>사주와 약간의 질문으로<br />잘 맞는 학과를 추천해 드릴게요.</h1></section><div className="wizard-actions intro-action"><button type="button" className="primary" onClick={() => setStarted(true)}>좋아요!</button></div></> : <>
       <section className="preference-questions wizard-question">
         <div className="wizard-progress" aria-label={`질문 진행률 ${step + 1}/${questions.length}`}><i><b style={{ width: `${((step + 1) / questions.length) * 100}%` }} /></i></div>
-        <fieldset key={questions[step].text}><legend>{questions[step].text}</legend><div>{questions[step].options.map(([label, axis]) => <label key={axis} className={answers[step] === axis ? "selected" : ""}>
+        <div className="wizard-question-body"><fieldset key={questions[step].text}><legend>{questions[step].text}</legend><div>{questions[step].options.map(([label, axis]) => <label key={axis} className={answers[step] === axis ? "selected" : ""}>
           <input type="radio" name={`question-${step}`} value={axis} checked={answers[step] === axis} onChange={() => choose(step, axis)} />{label}
-        </label>)}</div></fieldset>
+        </label>)}</div></fieldset></div>
       </section>
       {error && <p className="error">{error}</p>}
       <div className="wizard-actions"><button type="button" className="secondary" disabled={step === 0} onClick={() => setStep(step - 1)}>이전</button>

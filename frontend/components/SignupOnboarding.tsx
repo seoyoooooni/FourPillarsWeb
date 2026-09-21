@@ -61,7 +61,10 @@ export function SignupOnboarding() {
     <div className="signup-progress" aria-label={`회원가입 진행률 ${index + 1}/${steps.length}`}><i><b style={{ width: `${((index + 1) / steps.length) * 100}%` }} /></i></div>
     <form className="signup-step-form" onSubmit={next} noValidate>
       <div className="signup-step-content">
-        {step === "welcome" && <StepInput title="안녕하세요!" />}
+        {step === "welcome" && <div className="signup-welcome-scene">
+          <div className="signup-welcome-aura"><img className="signup-welcome-mascot" src="/images/mascot-guide-talking.png" alt="가입 과정을 안내하는 여우 마스코트" /></div>
+          <h1>안녕하세요!</h1>
+        </div>}
         {step === "email" && <StepInput title="이메일을 입력해 주세요" error={error}><input type="email" value={email} autoComplete="email" autoFocus placeholder="name@example.com" onChange={e => { setEmail(e.target.value); setError(""); }} /></StepInput>}
         {step === "password" && <StepInput title="비밀번호를 만들어 주세요" hint="8자 이상 입력해 주세요." error={error}><PasswordInput value={password} visible={visible} autoFocus onChange={value => { setPassword(value); setError(""); }} onToggle={() => setVisible(value => !value)} /></StepInput>}
         {step === "confirm" && <StepInput title="비밀번호를 한 번 더 입력해 주세요" error={error}><PasswordInput value={confirm} visible={visible} autoFocus onChange={value => { setConfirm(value); setError(""); }} onToggle={() => setVisible(value => !value)} /></StepInput>}

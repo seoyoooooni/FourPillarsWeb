@@ -6,6 +6,7 @@ import "./styles/forms-fidelity.css";
 import "./styles/pickers.css";
 import "./styles/campus-theme.css";
 import "./styles/decision.css";
+import "./styles/team.css";
 import "./styles/buttons.css";
 
 export const metadata: Metadata = {
