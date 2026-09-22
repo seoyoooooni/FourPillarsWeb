@@ -60,7 +60,7 @@ export function FortuneCalendar() {
       </div>
     </div>
     <div className={`calendar-summary-reveal${selected?" is-open":""}`}><div>
-      {selected&&<div className={`calendar-summary${selectedDay?" has-chart":""}`}>{selectedDay?<><div><span>{Number(selectedDay.date.slice(5,7))}월 {Number(selectedDay.date.slice(8))}일</span><strong>{selectedDay.score}<small>점</small><em> · {selectedDay.annualRank}위</em></strong></div><MiniRadar day={selectedDay}/></>:<p>{error?"기록을 불러오지 못했어요. 잠시 후 다시 열어 주세요.":"이날 확인한 운세가 없어요."}</p>}</div>}
+      {selected&&<div className={`calendar-summary${selectedDay?" has-chart":""}`}>{selectedDay?<><header className="calendar-summary-heading"><strong>{Number(selectedDay.date.slice(5,7))}월 {Number(selectedDay.date.slice(8))}일</strong><div><b>{selectedDay.score}<small>점</small></b><span>연간 {selectedDay.annualRank}위</span></div></header><MiniRadar day={selectedDay}/></>:<p>{error?"기록을 불러오지 못했어요. 잠시 후 다시 열어 주세요.":"이날 확인한 운세가 없어요."}</p>}</div>}
     </div></div>
   </section>;
 }

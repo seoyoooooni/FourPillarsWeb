@@ -20,7 +20,7 @@ function Results({ result }: { result: Calculation }) {
       ["대운 목록", result.daeunAnalysis.periods.map(p => `${p.startAge}세 ${p.stem}${p.branch}(${p.stemTenGod}·${p.branchTenGod})`).join(" · ")],
     ]] as [string, [string, string][]]] : []),
   ] as [string, [string, string][]][];
-  return <section className="results"><p className="result-guide">ⓘ 각 사주 결과를 누르면 쉬운 설명이 펼쳐집니다.</p><PillarSection pillars={result.pillars} /><DayMasterSection value={result.analysis.dayMaster} /><ElementSection counts={result.analysis.elementCounts} />{sections.map(([title, rows]) => <article key={title}><h2>{title}</h2>{rows.map(([label,value]) => <details key={label}><summary>{label}<span>{value}</span></summary><p>{explanationFor(label,result)}</p></details>)}</article>)}</section>;
+  return <section className="results"><p className="result-guide">ⓘ 각 사주 결과를 누르면 설명이 펼쳐져요.</p><PillarSection pillars={result.pillars} /><DayMasterSection value={result.analysis.dayMaster} /><ElementSection counts={result.analysis.elementCounts} />{sections.map(([title, rows]) => <article key={title}><h2>{title}</h2>{rows.map(([label,value]) => <details key={label}><summary>{label}<span>{value}</span></summary><p>{explanationFor(label,result)}</p></details>)}</article>)}</section>;
 }
 
 const pillarOrder = ["year", "month", "day", "hour"] as const;

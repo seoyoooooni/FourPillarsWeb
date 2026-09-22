@@ -5,7 +5,11 @@ import "./styles/fidelity.css";
 import "./styles/forms-fidelity.css";
 import "./styles/pickers.css";
 import "./styles/campus-theme.css";
-import "./styles/decision.css";
+import "./styles/study-tarot.css";
+import "./styles/tarot-shuffle.css";
+import "./styles/result-tarot.css";
+import "./styles/tarot-tweaks.css";
+import "./styles/drawer-menu.css";
 import "./styles/team.css";
 import "./styles/buttons.css";
 

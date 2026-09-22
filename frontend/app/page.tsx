@@ -8,12 +8,19 @@ import { SignupOnboarding } from "@/components/SignupOnboarding";
 import { FortuneCalendar } from "@/components/FortuneCalendar";
 
 const cards = [
-  { href: "/decision", image: "/images/card-compatibility-inha-v2.png", title: "운명저울", number: "I" },
+  { href: "/decision", image: "/images/card-study-tarot-inha-v2.png", title: "학업운", number: "I" },
   { href: "/major", image: "/images/card-major-inha-v2.png", title: "학과 추천", number: "II" },
   { href: "/today", image: "/images/card-airplane.png", title: "오늘의 운세", number: "III" },
   { href: "/saju", image: "/images/card-lifetime-inha-v2.png", title: "평생 사주", number: "IV" },
   { href: "/team", image: "/images/card-campus-inha-v2.png", title: "팀플 궁합", number: "V" },
 ];
+const drawerMenus = [
+  { href:"/decision", image:"/images/card-study-tarot-inha-v2.png", title:"학업운", number:"I" },
+  { href:"/major", image:"/images/card-major-inha-v2.png", title:"학과 추천", number:"II" },
+  { href:"/today", image:"/images/card-airplane.png", title:"오늘 운세", number:"III" },
+  { href:"/saju", image:"/images/card-lifetime-inha-v2.png", title:"평생 사주", number:"IV" },
+  { href:"/team", image:"/images/card-campus-inha-v2.png", title:"팀플 궁합", number:"V" },
+] as const;
 const angles = [-11, -5, 0, 5, 11];
 const offsets = [
   ["clamp(-360px, -31cqw, -230px)", 88],
@@ -61,7 +68,7 @@ export default function Home() {
     </div>
     <div className="page-dots">{cards.map((_,i)=><i className={i===focus?"active":""} key={i}/>)}</div>
     {calendarOpen&&<div className="calendar-popover-dim" onClick={()=>setCalendarOpen(false)}><section className="calendar-popover" role="dialog" aria-modal="true" aria-label="운세 캘린더" onClick={e=>e.stopPropagation()}><button className="calendar-popover-close" onClick={()=>setCalendarOpen(false)} aria-label="운세 캘린더 닫기"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15"/></svg></button><FortuneCalendar/></section></div>}
-    {menu&&<div className="maui-dim" onClick={closeMenu}><aside className="maui-drawer" style={{transform:`translateX(${drawerX}px)`,transition:drawerDragging?"none":"transform 180ms cubic-bezier(.55,0,1,.45)"}} onPointerDown={drawerDown} onPointerMove={drawerMove} onPointerUp={drawerUp} onPointerCancel={drawerUp} onClick={e=>e.stopPropagation()}><button className="drawer-profile" onPointerDown={e=>e.stopPropagation()} onClick={()=>router.push(loggedIn?"/profile":"/login")}><strong>{loggedIn?(profile?.displayName??"프로필을 설정하세요"):"로그인하세요"}</strong>{profile&&<small>{formatBirthDate(profile.birthDate)}</small>}</button><hr/><button onPointerDown={e=>e.stopPropagation()} onClick={()=>{if(loggedIn)logout();else router.push("/login");closeMenu()}}>{loggedIn?"로그아웃":"로그인"}</button></aside></div>}
+    {menu&&<div className="maui-dim" onClick={closeMenu}><aside className="maui-drawer" style={{transform:`translateX(${drawerX}px)`,transition:drawerDragging?"none":"transform 180ms cubic-bezier(.55,0,1,.45)"}} onPointerDown={drawerDown} onPointerMove={drawerMove} onPointerUp={drawerUp} onPointerCancel={drawerUp} onClick={e=>e.stopPropagation()}><button className="drawer-profile" onPointerDown={e=>e.stopPropagation()} onClick={()=>router.push(loggedIn?"/profile":"/login")}><strong>{loggedIn?(profile?.displayName??"프로필을 설정하세요"):"로그인하세요"}</strong>{profile&&<small>{formatBirthDate(profile.birthDate)}</small>}</button><hr/><nav className="drawer-menu-grid" aria-label="주요 메뉴">{drawerMenus.map(item=><button key={item.href} type="button" onPointerDown={e=>e.stopPropagation()} onClick={()=>{router.push(item.href);closeMenu()}}><span className="drawer-card-inner"><i>{item.number}</i><span className="drawer-card-image"><Image src={item.image} fill sizes="104px" alt="" /></span><strong>{item.title}</strong></span></button>)}</nav><button className="drawer-session-button" onPointerDown={e=>e.stopPropagation()} onClick={()=>{if(loggedIn)logout();else router.push("/login");closeMenu()}}>{loggedIn?"로그아웃":"로그인"}</button></aside></div>}
   </main>;
 }
 function formatBirthDate(value:string){const [y,m,d]=value.split("-").map(Number);return `${y}년 ${m}월 ${d}일`}

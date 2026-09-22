@@ -1,85 +1,25 @@
 "use client";
-
-import { FormEvent, useEffect, useRef, useState } from "react";
-import { Header } from "@/components/Header";
-
-type Choice = "a" | "b";
-
-export default function DecisionPage() {
-  const [optionA, setOptionA] = useState("");
-  const [optionB, setOptionB] = useState("");
-  const [result, setResult] = useState<Choice | null>(null);
-  const [drawing, setDrawing] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scaleRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
-
-  function resetResult() {
-    if (timer.current) clearTimeout(timer.current);
-    setDrawing(false);
-    setResult(null);
-  }
-
-  function draw(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!optionA.trim() || !optionB.trim() || drawing) return;
-    setResult(null);
-    setDrawing(true);
-    requestAnimationFrame(() => scaleRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
-    const winner: Choice = crypto.getRandomValues(new Uint32Array(1))[0] % 2 === 0 ? "a" : "b";
-    timer.current = setTimeout(() => {
-      setResult(winner);
-      setDrawing(false);
-      timer.current = null;
-    }, 1800);
-  }
-
-  return <main className="app-shell content-shell decision-shell">
-    <Header title="운명저울" />
-    <section className="decision-content">
-      <div className="decision-intro">
-        <div className="decision-guide"><img src="/images/mascot-thinking.png" alt="선택지를 고민하는 여우 마스코트" /></div>
-        <h1>운명저울</h1>
-        <p>두 가지 선택을 저울에 올려보세요.</p>
-      </div>
-      <form onSubmit={draw} className="decision-form">
-        <label htmlFor="decision-a">첫 번째 선택</label>
-        <input id="decision-a" value={optionA} onChange={event => { setOptionA(event.target.value); resetResult(); }} placeholder="예: 도서관 가기" maxLength={40} required />
-        <div className="decision-or">또는</div>
-        <label htmlFor="decision-b">두 번째 선택</label>
-        <input id="decision-b" value={optionB} onChange={event => { setOptionB(event.target.value); resetResult(); }} placeholder="예: 카페 가기" maxLength={40} required />
-        <button className="decision-draw" type="submit" disabled={drawing || !optionA.trim() || !optionB.trim()}>{drawing ? "저울이 기우는 중…" : result ? "다시 올리기" : "운에 맡기기"}</button>
-      </form>
-      <div ref={scaleRef} className={`decision-scale${drawing ? " is-drawing" : result ? ` is-${result}` : ""}`} aria-hidden="true">
-        <svg viewBox="0 0 520 350" role="presentation" preserveAspectRatio="xMidYMid meet">
-          <path className="scale-star" d="M260 7c2 22 10 31 31 33-21 2-29 11-31 33-2-22-10-31-31-33 21-2 29-11 31-33Z" />
-          <path className="scale-column" d="M255 81h10l7 249h-24l7-249Z" />
-          <path className="scale-foot" d="M187 330h146l-20 19H207l-20-19Z" />
-          <g className="scale-balance">
-            <path className="scale-line" d="M70 80h380" />
-            <g className="scale-pan-a">
-              <path className="scale-bowl-fill" d="M16 226Q70 270 124 226Z" />
-              <path className="scale-line" d="M70 80 16 226M70 80l54 146M16 226q54 44 108 0" />
-              <foreignObject x="25" y="193" width="90" height="36"><div className="scale-label">{optionA.trim() || "첫 번째 선택"}</div></foreignObject>
-            </g>
-            <g className="scale-pan-b">
-              <path className="scale-bowl-fill" d="M396 226q54 44 108 0Z" />
-              <path className="scale-line" d="M450 80 396 226M450 80l54 146M396 226q54 44 108 0" />
-              <foreignObject x="405" y="193" width="90" height="36"><div className="scale-label">{optionB.trim() || "두 번째 선택"}</div></foreignObject>
-            </g>
-          </g>
-          <circle className="scale-pivot" cx="260" cy="80" r="10" />
-        </svg>
-      </div>
-      <div className="decision-result" aria-live="polite" aria-atomic="true">
-        {drawing ? <p>저울이 어느 쪽으로 기울까요?</p> : result ? <>
-          <strong>{result === "a" ? optionA.trim() : optionB.trim()}</strong>
-          <p>저울이 이쪽으로 기울었어요.</p>
-        </> : <p>선택지를 적고 저울에 올려보세요.</p>}
-      </div>
-    </section>
-  </main>;
+import Image from "next/image";
+import {useState,type CSSProperties} from "react";
+import {Header} from "@/components/Header";
+import {tarotCardBack,tarotCards,TarotCard} from "@/lib/tarot-data";
+export default function StudyFortunePage(){
+ const[card,setCard]=useState<TarotCard|null>(null);const[drawing,setDrawing]=useState(false);const[selected,setSelected]=useState<number|null>(null);const[shuffling,setShuffling]=useState(false);const[shuffleSeed,setShuffleSeed]=useState(0);
+ function draw(position:number){if(drawing||shuffling||card)return;setSelected(position);setDrawing(true);window.setTimeout(()=>{const saved=getSavedDailyCard();const n=crypto.getRandomValues(new Uint32Array(1))[0];const picked=saved??tarotCards[n%tarotCards.length];if(!saved)window.localStorage.setItem("daily-study-tarot",JSON.stringify({date:localDateKey(),cardId:picked.id}));setCard(picked);setDrawing(false)},700)}
+ function shuffle(){if(drawing||shuffling)return;setShuffling(true);setShuffleSeed(value=>value+1);window.setTimeout(()=>setShuffling(false),750)}
+ return <main className="app-shell content-shell study-tarot-shell"><Header title="학업운"/><section className="study-tarot-content" style={{paddingTop:18}}>
+  {!card&&<header className="study-tarot-intro"><h1>뽑아보세요!</h1></header>}
+  {!card&&<><div className={`tarot-fan${shuffling?" is-shuffling":""}`} style={{marginTop:52}} aria-label="섞여 있는 타로 카드">{Array.from({length:18},(_,i)=>{const turns=[-9,6,-3,8,-6,2,7,-5];const shifts=[-2,3,-1,2,0,2,-3,1];const order=i+shuffleSeed;const column=i%6;const row=Math.floor(i/6);return <button key={i} type="button" className={`tarot-fan-card${selected===i?" is-selected":""}`} style={{"--angle":`${turns[(order*5)%turns.length]}deg`,"--shift":`${shifts[(order*3)%shifts.length]}px`,"--mix-x":`${(2.5-column)*78}px`,"--mix-y":`${(1-row)*108}px`,"--shuffle-delay":`${(i%6)*18}ms`} as CSSProperties} onClick={()=>draw(i)} disabled={drawing||shuffling} aria-label={`${i+1}번째 타로 카드 선택`}><Image src={tarotCardBack} width={180} height={315} alt="" priority/></button>})}</div><button className="tarot-shuffle" type="button" onClick={shuffle} disabled={shuffling}>{shuffling?"섞는 중…":"카드 섞기"}</button></>}
+  {card&&<div className="result-mascot-card"><div className="chosen-tarot"><Image src={card.image} width={240} height={420} alt={`${card.name} 카드`} priority/></div><Image className="result-fox" src="/images/mascot-tarot-holder.png" width={900} height={1200} alt="선택한 카드를 두 앞발로 잡고 있는 별여우" priority/></div>}
+  <div className="study-tarot-live" aria-live="polite">{card&&<article className="study-tarot-result" style={{marginTop:0,paddingTop:6,borderTop:0}}>
+   <p className="study-tarot-name-en">{card.englishName}</p><h2>{card.name}</h2>
+   <div className="study-tarot-keywords">{card.keywords.map(x=><span key={x}>#{x}</span>)}</div>
+   <div className="mascot-reading"><Image src="/images/mascot-guide-talking.png" width={150} height={150} alt="카드를 설명하는 여우 마스코트"/><div className="mascot-speech"><b>이 카드는 말이야…</b><p>{card.study.summary}</p></div></div>
+   <section><h3>오늘의 조언</h3><p>{card.study.advice}</p></section><section><h3>이건 조심해!</h3><p>{card.study.caution}</p></section>
+   <section className="study-tarot-mission"><h3>오늘의 미션</h3><p>{card.study.mission}</p></section>
+   <section className="study-tarot-symbols"><h3>카드의 핵심 상징</h3><p>{card.symbols.join(" · ")}</p></section>
+  </article>}</div>
+ </section></main>
 }
+function localDateKey(){const now=new Date();return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`}
+function getSavedDailyCard(){const saved=window.localStorage.getItem("daily-study-tarot");if(!saved)return null;try{const value=JSON.parse(saved) as {date:string;cardId:string};if(value.date!==localDateKey())return null;return tarotCards.find(item=>item.id===value.cardId)??null}catch{window.localStorage.removeItem("daily-study-tarot");return null}}
