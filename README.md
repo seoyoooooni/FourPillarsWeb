@@ -1,14 +1,5 @@
 # FourPillars
 
-> 메인화면
-
-<p align="center">
-  <img src="README_images/09-home-today.png" width="19%" alt="오늘의 운세 메인 화면" />
-  <img src="README_images/10-home-major.png" width="19%" alt="학과 추천 메인 화면" />
-  <img src="README_images/11-home-study.png" width="19%" alt="학업운 메인 화면" />
-  <img src="README_images/12-home-lifetime.png" width="19%" alt="평생 사주 메인 화면" />
-  <img src="README_images/13-home-team.png" width="19%" alt="팀플 궁합 메인 화면" />
-</p>
 
 ## 1. 프로젝트 소개
 
@@ -52,7 +43,15 @@ FourPillars는 사용자의 생년월일시로 사주를 계산하고, 그 결�
   </tr>
 </table>
 
-### 2.2 메인 탐색과 프로필 관리
+### 2.2 메인 화면과 프로필 관리
+
+<p align="center">
+  <img src="README_images/09-home-today.png" width="19%" alt="오늘의 운세 메인 화면" />
+  <img src="README_images/10-home-major.png" width="19%" alt="학과 추천 메인 화면" />
+  <img src="README_images/11-home-study.png" width="19%" alt="학업운 메인 화면" />
+  <img src="README_images/12-home-lifetime.png" width="19%" alt="평생 사주 메인 화면" />
+  <img src="README_images/13-home-team.png" width="19%" alt="팀플 궁합 메인 화면" />
+</p>
 
 메인은 다섯 기능을 카드 캐러셀로 탐색하도록 구성했습니다. 사이드 메뉴에서는 전체 기능으로 바로 이동할 수 있고, 저장한 출생 정보는 프로필 화면에서 언제든 수정할 수 있습니다.
 
