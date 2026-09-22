@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 @Service
 public class AnnualFortuneGenerationService {
-    public static final String CALCULATION_VERSION = "daily-v2";
+    public static final String CALCULATION_VERSION = "daily-v3-solar-terms";
     private final FortuneCalculationService calculationService;
     private final DailyFortuneCacheRepository repository;
     private final ObjectMapper objectMapper;

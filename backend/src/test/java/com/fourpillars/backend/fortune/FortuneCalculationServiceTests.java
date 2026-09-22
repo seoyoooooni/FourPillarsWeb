@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,13 +54,13 @@ class FortuneCalculationServiceTests {
 
         assertThat(daeun).isNotNull();
         assertThat(daeun.forward()).isTrue();
-        assertThat(daeun.startAge()).isEqualTo(10);
+        assertThat(daeun.startAge()).isEqualTo(7);
         assertThat(daeun.periods()).hasSize(8);
         assertThat(daeun.periods().get(0).order()).isEqualTo(1);
-        assertThat(daeun.periods().get(0).startAge()).isEqualTo(10);
+        assertThat(daeun.periods().get(0).startAge()).isEqualTo(7);
         assertThat(daeun.periods().get(0).stem()).isEqualTo("신");
         assertThat(daeun.periods().get(0).branch()).isEqualTo("묘");
-        assertThat(daeun.periods().get(1).startAge()).isEqualTo(20);
+        assertThat(daeun.periods().get(1).startAge()).isEqualTo(17);
         assertThat(daeun.periods().get(1).stem()).isEqualTo("임");
         assertThat(daeun.periods().get(1).branch()).isEqualTo("진");
     }
@@ -80,25 +81,65 @@ class FortuneCalculationServiceTests {
 
         assertThat(result.analysis().dayMaster()).isEqualTo("경");
         assertThat(yongsin.strength()).isEqualTo("신약");
-        assertThat(yongsin.strengthScore()).isEqualTo(-4);
-        assertThat(yongsin.categoryCounts()).containsEntry("비겁", 0).containsEntry("인성", 2);
+        assertThat(yongsin.strengthScore()).isEqualTo(-14);
+        assertThat(yongsin.categoryCounts()).isEqualTo(Map.of(
+                "비겁", 2, "식상", 13, "재성", 5, "관성", 4, "인성", 6));
+        assertThat(yongsin.yongsinReason()).contains("간이 균형 분석");
         assertThat(yongsin.weakPriority()).isEqualTo("비겁");
         assertThat(yongsin.strongPriority()).isEqualTo("관성");
         assertThat(yongsin.yongsinElement()).isEqualTo("금");
     }
 
     @Test
-    void yongsinPrefersSiksangOverGwanseongWhenSiksangIsScarcerInAStrongChart() {
+    void yongsinUsesWeightedHiddenStemsInAStrongChart() {
         var request = new FortuneCalculationRequest(LocalDate.parse("1926-01-09"), LocalTime.of(8, 0), CalendarType.SOLAR, false, null);
         var result = service.calculate(request);
         var yongsin = result.yongsinAnalysis();
 
         assertThat(result.analysis().dayMaster()).isEqualTo("무");
         assertThat(yongsin.strength()).isEqualTo("신강");
-        assertThat(yongsin.strengthScore()).isEqualTo(2);
-        assertThat(yongsin.categoryCounts()).containsEntry("식상", 0).containsEntry("관성", 1);
+        assertThat(yongsin.strengthScore()).isEqualTo(6);
+        assertThat(yongsin.categoryCounts()).isEqualTo(Map.of(
+                "비겁", 17, "식상", 7, "재성", 5, "관성", 3, "인성", 4));
+        assertThat(yongsin.yongsinReason()).contains("간이 균형 분석");
         assertThat(yongsin.weakPriority()).isEqualTo("인성");
-        assertThat(yongsin.strongPriority()).isEqualTo("식상");
-        assertThat(yongsin.yongsinElement()).isEqualTo("금");
+        assertThat(yongsin.strongPriority()).isEqualTo("관성");
+        assertThat(yongsin.yongsinElement()).isEqualTo("목");
+    }
+
+    @Test
+    void daeunUsesTheConvertedSolarDateForLunarBirthInputs() {
+        var request = new FortuneCalculationRequest(LocalDate.parse("2023-02-28"), LocalTime.NOON, CalendarType.LUNAR, true, GenderBasis.FEMALE);
+        var result = service.calculate(request);
+        var daeun = result.daeunAnalysis();
+
+        assertThat(result.solarDate()).isEqualTo("2023-04-18");
+        assertThat(daeun).isNotNull();
+        assertThat(daeun.forward()).isTrue();
+        assertThat(daeun.startAge()).isEqualTo(6);
+        assertThat(daeun.periods().get(0).stem()).isEqualTo("정");
+        assertThat(daeun.periods().get(0).branch()).isEqualTo("사");
+        assertThat(daeun.periods().get(1).startAge()).isEqualTo(16);
+        assertThat(daeun.periods().get(1).stem()).isEqualTo("무");
+        assertThat(daeun.periods().get(1).branch()).isEqualTo("오");
+    }
+
+    @Test
+    void yearAndMonthPillarsChangeAtLichunInsteadOfLunarNewYear() {
+        var before = service.calculate(new FortuneCalculationRequest(LocalDate.parse("2023-02-04"), LocalTime.of(10, 0), CalendarType.SOLAR, false));
+        var after = service.calculate(new FortuneCalculationRequest(LocalDate.parse("2023-02-04"), LocalTime.of(13, 0), CalendarType.SOLAR, false));
+
+        assertThat(before.pillars()).containsEntry("year", "임인").containsEntry("month", "계축");
+        assertThat(after.pillars()).containsEntry("year", "계묘").containsEntry("month", "갑인");
+    }
+
+    @Test
+    void lateRatHourUsesTheNextDaysDayPillar() {
+        var before = service.calculate(new FortuneCalculationRequest(LocalDate.parse("1926-02-13"), LocalTime.of(22, 59), CalendarType.SOLAR, false));
+        var after = service.calculate(new FortuneCalculationRequest(LocalDate.parse("1926-02-13"), LocalTime.of(23, 0), CalendarType.SOLAR, false));
+
+        assertThat(before.pillars().get("day")).isEqualTo("계유");
+        assertThat(after.pillars().get("day")).isEqualTo("갑술");
+        assertThat(after.pillars().get("hour")).isEqualTo("갑자");
     }
 }

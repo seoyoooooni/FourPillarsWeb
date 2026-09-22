@@ -8,12 +8,14 @@ import com.fourpillars.backend.fortune.dto.FortuneCalculationResponse;
 import com.fourpillars.backend.fortune.dto.TodayFortuneResponse;
 import com.fourpillars.backend.profile.dto.BirthProfileResponse;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalTime;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -76,8 +78,15 @@ public class FortuneCalculationService {
     private final Map<String, PillarRecord> lunarRecords = new LinkedHashMap<>();
     private final Set<String> lunarMonths = new java.util.HashSet<>();
     private final Set<String> leapLunarMonths = new java.util.HashSet<>();
+    private final SolarTermService solarTermService;
 
     public FortuneCalculationService() throws IOException {
+        this(new SolarTermService());
+    }
+
+    @Autowired
+    public FortuneCalculationService(SolarTermService solarTermService) throws IOException {
+        this.solarTermService = solarTermService;
         var objectMapper = new ObjectMapper().enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
         var resource = new ClassPathResource("fortune/pillars.json");
         List<PillarRecord> records = objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {});
@@ -98,14 +107,21 @@ public class FortuneCalculationService {
         if (record == null) throw new IllegalArgumentException(request.calendarType().name().equals("LUNAR")
                 ? "선택한 음력 날짜는 존재하지 않습니다. 날짜를 다시 확인해 주세요."
                 : "선택한 날짜는 만세력 지원 범위(1926-01-01~2027-12-31) 밖입니다.");
-        var year = split(record.yearPillar()); var month = split(record.monthPillar()); var day = split(record.dayPillar());
+        var solarDate = LocalDate.parse(record.solarDate());
+        var birthDateTime = ZonedDateTime.of(solarDate, request.birthTime(), SolarTermService.KOREA);
+        var termContext = solarTermService.contextAt(birthDateTime);
+        var year = yearPillar(termContext.pillarYear());
+        var month = monthPillar(year.stem(), termContext.monthIndex());
+        var dayRecord = request.birthTime().getHour() == 23 ? solarRecords.get(solarDate.plusDays(1).toString()) : record;
+        if (dayRecord == null) throw new IllegalArgumentException("야자시 일주 계산에 필요한 다음 날 만세력 데이터가 없습니다.");
+        var day = split(dayRecord.dayPillar());
         var hour = calculateHour(day.stem(), request.birthTime());
         var pillars = new Pillars(year.stem(), year.branch(), month.stem(), month.branch(), day.stem(), day.branch(), hour.stem(), hour.branch());
         var basic = analyzeBasic(pillars);
         var resultPillars = new LinkedHashMap<String, String>();
-        resultPillars.put("year", record.yearPillar()); resultPillars.put("month", record.monthPillar());
-        resultPillars.put("day", record.dayPillar()); resultPillars.put("hour", hour.stem() + hour.branch());
-        var daeun = analyzeDaeun(pillars, request.birthDate(), record.monthPillar(), request.gender());
+        resultPillars.put("year", year.stem() + year.branch()); resultPillars.put("month", month.stem() + month.branch());
+        resultPillars.put("day", day.stem() + day.branch()); resultPillars.put("hour", hour.stem() + hour.branch());
+        var daeun = analyzeDaeun(pillars, birthDateTime, termContext, request.gender());
         return new FortuneCalculationResponse(record.solarDate(), new FortuneCalculationResponse.LunarDate(record.lunarYear(), record.lunarMonth(), record.lunarDay(), record.isLeapMonth()), resultPillars, basic, analyzeStageTwo(pillars), analyzeStageThree(pillars), analyzeYongsin(basic), daeun);
     }
 
@@ -137,13 +153,13 @@ public class FortuneCalculationService {
         var today = targetDate;
         var current = solarRecords.get(today.toString());
         if (current == null) throw new IllegalArgumentException("오늘 날짜는 아직 만세력 데이터 지원 범위에 포함되지 않습니다.");
-        var fortune = dailyFortune(natal, current, natalCalculation.yongsinAnalysis().yongsinElement(), profile.gender().name());
-        var annual = solarRecords.values().stream().filter(r -> r.solarDate().startsWith(today.getYear() + "-")).map(r -> dailyFortune(natal, r, natalCalculation.yongsinAnalysis().yongsinElement(), profile.gender().name()).overall()).toList();
+        var fortune = dailyFortune(natal, current, natalCalculation.yongsinAnalysis().yongsinElement());
+        var annual = solarRecords.values().stream().filter(r -> r.solarDate().startsWith(today.getYear() + "-")).map(r -> dailyFortune(natal, r, natalCalculation.yongsinAnalysis().yongsinElement()).overall()).toList();
         int rank = (int) annual.stream().filter(score -> score > fortune.overall()).count() + 1;
         var recent = new ArrayList<TodayFortuneResponse.TrendPoint>();
         for (int offset = -6; offset <= 0; offset++) {
             var date = today.plusDays(offset); var record = solarRecords.get(date.toString());
-            if (record != null) recent.add(new TodayFortuneResponse.TrendPoint(date, dailyFortune(natal, record, natalCalculation.yongsinAnalysis().yongsinElement(), profile.gender().name()).overall(), offset == 0));
+            if (record != null) recent.add(new TodayFortuneResponse.TrendPoint(date, dailyFortune(natal, record, natalCalculation.yongsinAnalysis().yongsinElement()).overall(), offset == 0));
         }
         return new TodayFortuneResponse(fortune, new TodayFortuneResponse.AnnualRank(rank, annual.size(), Math.max(1, (int) Math.ceil(rank * 100d / annual.size()))), recent);
     }
@@ -158,15 +174,15 @@ public class FortuneCalculationService {
         solarRecords.values().stream()
                 .filter(record -> record.solarDate().startsWith(year + "-"))
                 .forEach(record -> result.put(LocalDate.parse(record.solarDate()),
-                        dailyFortune(natal, record, usefulElement, profile.gender().name())));
+                        dailyFortune(natal, record, usefulElement)));
         return result;
     }
 
-    private TodayFortuneResponse.DailyFortune dailyFortune(Pillars natal, PillarRecord record, String usefulElement, String gender) {
+    private TodayFortuneResponse.DailyFortune dailyFortune(Pillars natal, PillarRecord record, String usefulElement) {
         var day = split(record.dayPillar()); var todayTenGod = tenGod(natal.dayStem(), day.stem());
         int[] scores = {60, 60, 60, 60, 60, 60}; add(scores, switch (todayTenGod) {
-            case "정재" -> new int[]{12, gender.equals("MALE") ? 8 : 3, 1, 5, 3, 1}; case "편재" -> new int[]{9, gender.equals("MALE") ? 6 : 3, 0, 4, 7, 0};
-            case "정관" -> new int[]{3, gender.equals("FEMALE") ? 8 : 3, 1, 12, 5, 4}; case "편관" -> new int[]{1, gender.equals("FEMALE") ? 5 : 1, -5, 8, 1, 2};
+            case "정재" -> new int[]{12,5,1,5,3,1}; case "편재" -> new int[]{9,4,0,4,7,0};
+            case "정관" -> new int[]{3,5,1,12,5,4}; case "편관" -> new int[]{1,3,-5,8,1,2};
             case "정인" -> new int[]{1,2,6,3,4,12}; case "편인" -> new int[]{0,0,2,1,-1,9}; case "식신" -> new int[]{5,5,8,3,8,4};
             case "상관" -> new int[]{4,3,1,-3,4,7}; case "비견" -> new int[]{1,2,5,4,7,3}; case "겁재" -> new int[]{-7,1,3,2,5,1}; default -> new int[6]; });
         if (STEM_INFO.get(day.stem()).element().equals(usefulElement)) add(scores, new int[]{3,3,5,4,4,4});
@@ -219,15 +235,16 @@ public class FortuneCalculationService {
     private void match(List<TodayFortuneResponse.Interaction> result, Set<String> table, String type, NamedValue natal, String today, int effect) { if (table.contains(pairKey(natal.value(), today))) result.add(new TodayFortuneResponse.Interaction(type, natal.name(), natal.value(), today, effect)); }
     private static void add(int[] scores, int[] effects) { for (int i = 0; i < scores.length; i++) scores[i] += effects[i]; }
 
-    private FortuneCalculationResponse.DaeunAnalysis analyzeDaeun(Pillars p, LocalDate birthDate, String birthMonthPillarRaw,
+    private FortuneCalculationResponse.DaeunAnalysis analyzeDaeun(Pillars p, ZonedDateTime birthDateTime,
+                                                                  SolarTermService.SolarTermContext termContext,
                                                                   com.fourpillars.backend.profile.domain.GenderBasis gender) {
         if (gender == null) return null;
         boolean yangYear = YANG_STEMS.contains(p.yearStem());
         boolean forward = yangYear == (gender == com.fourpillars.backend.profile.domain.GenderBasis.MALE);
-        long daysToBoundary = forward
-                ? java.time.temporal.ChronoUnit.DAYS.between(birthDate, findMonthBoundaryForward(birthDate, birthMonthPillarRaw))
-                : java.time.temporal.ChronoUnit.DAYS.between(findMonthBoundaryBackward(birthDate, birthMonthPillarRaw), birthDate);
-        int startAge = (int) Math.round(daysToBoundary / 3d);
+        long secondsToBoundary = forward
+                ? java.time.Duration.between(birthDateTime, termContext.next().dateTime()).getSeconds()
+                : java.time.Duration.between(termContext.previous().dateTime(), birthDateTime).getSeconds();
+        int startAge = Math.max(0, (int) Math.round(secondsToBoundary / (3d * 86_400d)));
         int monthIndex = ganziIndex(p.monthStem(), p.monthBranch());
         var periods = new ArrayList<FortuneCalculationResponse.DaeunPeriod>();
         for (int i = 1; i <= 8; i++) {
@@ -237,28 +254,6 @@ public class FortuneCalculationService {
                     tenGod(p.dayStem(), stem), tenGod(p.dayStem(), HIDDEN.get(branch).getLast().stem()), twelveStage(p.dayStem(), branch)));
         }
         return new FortuneCalculationResponse.DaeunAnalysis(forward, startAge, periods);
-    }
-
-    private LocalDate findMonthBoundaryForward(LocalDate birthDate, String monthPillar) {
-        var date = birthDate.plusDays(1);
-        for (int i = 0; i < 40; i++) {
-            var record = solarRecords.get(date.toString());
-            if (record == null) throw new IllegalArgumentException("선택한 생년월일은 대운을 계산하기에 만세력 데이터 범위 끝에 너무 가깝습니다.");
-            if (!record.monthPillar().equals(monthPillar)) return date;
-            date = date.plusDays(1);
-        }
-        throw new IllegalArgumentException("대운 계산에 필요한 절기 경계를 찾지 못했습니다.");
-    }
-
-    private LocalDate findMonthBoundaryBackward(LocalDate birthDate, String monthPillar) {
-        var date = birthDate.minusDays(1);
-        for (int i = 0; i < 40; i++) {
-            var record = solarRecords.get(date.toString());
-            if (record == null) throw new IllegalArgumentException("선택한 생년월일은 대운을 계산하기에 만세력 데이터 범위 끝에 너무 가깝습니다.");
-            if (!record.monthPillar().equals(monthPillar)) return date.plusDays(1);
-            date = date.minusDays(1);
-        }
-        throw new IllegalArgumentException("대운 계산에 필요한 절기 경계를 찾지 못했습니다.");
     }
 
     private FortuneCalculationResponse.BasicAnalysis analyzeBasic(Pillars p) {
@@ -308,16 +303,28 @@ public class FortuneCalculationService {
 
     private FortuneCalculationResponse.YongsinAnalysis analyzeYongsin(FortuneCalculationResponse.BasicAnalysis basic) {
         var counts = new LinkedHashMap<String, Integer>(); List.of("비겁", "식상", "재성", "관성", "인성").forEach(v -> counts.put(v, 0));
-        basic.tenGods().forEach((key, god) -> { var category = CATEGORY.get(god); if (category != null) counts.compute(category, (k, n) -> n + (key.equals("month_ji") ? 2 : 1)); });
+        basic.tenGods().forEach((key, god) -> {
+            var category = CATEGORY.get(god);
+            if (key.endsWith("_gan") && category != null) counts.compute(category, (k, n) -> n + 2);
+        });
+        basic.hiddenStems().forEach((key, stems) -> stems.forEach(hidden -> {
+            var category = CATEGORY.get(hidden.tenGod());
+            if (category != null) {
+                int weight = switch (hidden.position()) { case "정기" -> 3; case "중기" -> 2; default -> 1; };
+                if (key.equals("month_ji")) weight *= 2;
+                int addition = weight;
+                counts.compute(category, (k, n) -> n + addition);
+            }
+        }));
         int score = counts.get("비겁") + counts.get("인성") - counts.get("식상") - counts.get("재성") - counts.get("관성");
-        var dayElement = STEM_INFO.get(basic.dayMaster()).element(); var strong = score > 0;
+        var dayElement = STEM_INFO.get(basic.dayMaster()).element(); var strong = score >= 0;
         var weakPriority = lowestCategory(counts, "인성", "비겁");
         var strongPriority = lowestCategory(counts, "관성", "식상", "재성");
         var priority = strong ? strongPriority : weakPriority;
         var element = categoryElement(dayElement, priority);
         var reason = strong
-                ? "일간이 신강하여 이를 견제하는 범주 중 가장 부족한 " + priority + " 오행을 용신으로 삼음"
-                : "일간이 신약하여 이를 돕는 범주 중 가장 부족한 " + priority + " 오행을 용신으로 삼음";
+                ? "계절과 지장간 가중치를 반영한 간이 균형 분석에서 일간이 신강하여, 견제 범주 중 가장 부족한 " + priority + " 오행을 추천함"
+                : "계절과 지장간 가중치를 반영한 간이 균형 분석에서 일간이 신약하여, 보완 범주 중 가장 부족한 " + priority + " 오행을 추천함";
         return new FortuneCalculationResponse.YongsinAnalysis(score, strong ? "신강" : "신약", counts, element, reason, weakPriority, strongPriority);
     }
 
@@ -350,6 +357,14 @@ public class FortuneCalculationService {
     private PillarPart calculateHour(String dayStem, LocalTime time) {
         int h = time.getHour(); int index = (h == 23 || h == 0) ? 0 : (h + 1) / 2;
         return new PillarPart(STEMS.get((STEMS.indexOf(FIRST_HOUR_STEM.get(dayStem)) + index) % 10), BRANCHES.get(index));
+    }
+    private PillarPart yearPillar(int year) {
+        int index = Math.floorMod(year - 1984, 60);
+        return new PillarPart(STEMS.get(index % 10), BRANCHES.get(index % 12));
+    }
+    private PillarPart monthPillar(String yearStem, int monthIndex) {
+        int firstStem = (STEMS.indexOf(yearStem) % 5 * 2 + 2) % 10;
+        return new PillarPart(STEMS.get((firstStem + monthIndex) % 10), BRANCHES.get((2 + monthIndex) % 12));
     }
     private String twelveStage(String stem, String branch) { int start = BRANCHES.indexOf(JANGSAENG.get(stem)), target = BRANCHES.indexOf(branch); int offset = YANG_STEMS.contains(stem) ? Math.floorMod(target - start, 12) : Math.floorMod(start - target, 12); return STAGE_NAMES.get(offset); }
     private String sinsal(String reference, String target) { return SINSAL_NAMES.get(Math.floorMod(BRANCHES.indexOf(target) - BRANCHES.indexOf(GEOBSAL.get(TRIO.get(reference))), 12)); }
