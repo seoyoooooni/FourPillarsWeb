@@ -42,7 +42,7 @@ public class FortuneCalculationService {
             Map.entry("자", hs("임", "여기", "계", "정기")), Map.entry("축", hs("계", "여기", "신", "중기", "기", "정기")),
             Map.entry("인", hs("무", "여기", "병", "중기", "갑", "정기")), Map.entry("묘", hs("갑", "여기", "을", "정기")),
             Map.entry("진", hs("을", "여기", "계", "중기", "무", "정기")), Map.entry("사", hs("무", "여기", "경", "중기", "병", "정기")),
-            Map.entry("오", hs("병", "여기", "기", "정기")), Map.entry("미", hs("정", "여기", "을", "중기", "기", "정기")),
+            Map.entry("오", hs("병", "여기", "기", "중기", "정", "정기")), Map.entry("미", hs("정", "여기", "을", "중기", "기", "정기")),
             Map.entry("신", hs("무", "여기", "임", "중기", "경", "정기")), Map.entry("유", hs("경", "여기", "신", "정기")),
             Map.entry("술", hs("신", "여기", "정", "중기", "무", "정기")), Map.entry("해", hs("무", "여기", "갑", "중기", "임", "정기")));
     private static final Map<String, String> GENERATES = Map.of("목", "화", "화", "토", "토", "금", "금", "수", "수", "목");
@@ -56,6 +56,7 @@ public class FortuneCalculationService {
     private static final Map<String, String> MUNCHANG = Map.of("갑", "사", "을", "오", "병", "신", "정", "유", "무", "신", "기", "유", "경", "해", "신", "자", "임", "인", "계", "묘");
     private static final Map<String, String> WOLDEOK = Map.of("화", "병", "수", "임", "금", "경", "목", "갑");
     private static final Map<String, String> CHEONDEOK = Map.ofEntries(Map.entry("인", "정"), Map.entry("묘", "신"), Map.entry("진", "임"), Map.entry("사", "신"), Map.entry("오", "해"), Map.entry("미", "갑"), Map.entry("신", "계"), Map.entry("유", "인"), Map.entry("술", "병"), Map.entry("해", "을"), Map.entry("자", "사"), Map.entry("축", "경"));
+    private static final Set<String> CHEONDEOK_BRANCH_MONTHS = Set.of("묘", "오", "유", "자");
     private static final Map<String, String> AMROK = Map.of("갑", "해", "을", "술", "병", "신", "정", "미", "무", "신", "기", "미", "경", "사", "신", "진", "임", "인", "계", "축");
     private static final Map<String, String> YANGIN = Map.of("갑", "묘", "병", "오", "무", "오", "경", "유", "임", "자");
     private static final Map<String, String> HONGYEOM = Map.of("갑", "오", "을", "오", "병", "인", "정", "미", "무", "진", "기", "진", "경", "술", "신", "유", "임", "자", "계", "신");
@@ -104,7 +105,8 @@ public class FortuneCalculationService {
         var resultPillars = new LinkedHashMap<String, String>();
         resultPillars.put("year", record.yearPillar()); resultPillars.put("month", record.monthPillar());
         resultPillars.put("day", record.dayPillar()); resultPillars.put("hour", hour.stem() + hour.branch());
-        return new FortuneCalculationResponse(record.solarDate(), new FortuneCalculationResponse.LunarDate(record.lunarYear(), record.lunarMonth(), record.lunarDay(), record.isLeapMonth()), resultPillars, basic, analyzeStageTwo(pillars), analyzeStageThree(pillars), analyzeYongsin(basic));
+        var daeun = analyzeDaeun(pillars, request.birthDate(), record.monthPillar(), request.gender());
+        return new FortuneCalculationResponse(record.solarDate(), new FortuneCalculationResponse.LunarDate(record.lunarYear(), record.lunarMonth(), record.lunarDay(), record.isLeapMonth()), resultPillars, basic, analyzeStageTwo(pillars), analyzeStageThree(pillars), analyzeYongsin(basic), daeun);
     }
 
     public void validateBirthDate(LocalDate date, com.fourpillars.backend.profile.domain.CalendarType calendarType,
@@ -217,6 +219,48 @@ public class FortuneCalculationService {
     private void match(List<TodayFortuneResponse.Interaction> result, Set<String> table, String type, NamedValue natal, String today, int effect) { if (table.contains(pairKey(natal.value(), today))) result.add(new TodayFortuneResponse.Interaction(type, natal.name(), natal.value(), today, effect)); }
     private static void add(int[] scores, int[] effects) { for (int i = 0; i < scores.length; i++) scores[i] += effects[i]; }
 
+    private FortuneCalculationResponse.DaeunAnalysis analyzeDaeun(Pillars p, LocalDate birthDate, String birthMonthPillarRaw,
+                                                                  com.fourpillars.backend.profile.domain.GenderBasis gender) {
+        if (gender == null) return null;
+        boolean yangYear = YANG_STEMS.contains(p.yearStem());
+        boolean forward = yangYear == (gender == com.fourpillars.backend.profile.domain.GenderBasis.MALE);
+        long daysToBoundary = forward
+                ? java.time.temporal.ChronoUnit.DAYS.between(birthDate, findMonthBoundaryForward(birthDate, birthMonthPillarRaw))
+                : java.time.temporal.ChronoUnit.DAYS.between(findMonthBoundaryBackward(birthDate, birthMonthPillarRaw), birthDate);
+        int startAge = (int) Math.round(daysToBoundary / 3d);
+        int monthIndex = ganziIndex(p.monthStem(), p.monthBranch());
+        var periods = new ArrayList<FortuneCalculationResponse.DaeunPeriod>();
+        for (int i = 1; i <= 8; i++) {
+            int idx = Math.floorMod(monthIndex + (forward ? i : -i), 60);
+            var stem = STEMS.get(idx % 10); var branch = BRANCHES.get(idx % 12);
+            periods.add(new FortuneCalculationResponse.DaeunPeriod(i, startAge + (i - 1) * 10, stem, branch,
+                    tenGod(p.dayStem(), stem), tenGod(p.dayStem(), HIDDEN.get(branch).getLast().stem()), twelveStage(p.dayStem(), branch)));
+        }
+        return new FortuneCalculationResponse.DaeunAnalysis(forward, startAge, periods);
+    }
+
+    private LocalDate findMonthBoundaryForward(LocalDate birthDate, String monthPillar) {
+        var date = birthDate.plusDays(1);
+        for (int i = 0; i < 40; i++) {
+            var record = solarRecords.get(date.toString());
+            if (record == null) throw new IllegalArgumentException("선택한 생년월일은 대운을 계산하기에 만세력 데이터 범위 끝에 너무 가깝습니다.");
+            if (!record.monthPillar().equals(monthPillar)) return date;
+            date = date.plusDays(1);
+        }
+        throw new IllegalArgumentException("대운 계산에 필요한 절기 경계를 찾지 못했습니다.");
+    }
+
+    private LocalDate findMonthBoundaryBackward(LocalDate birthDate, String monthPillar) {
+        var date = birthDate.minusDays(1);
+        for (int i = 0; i < 40; i++) {
+            var record = solarRecords.get(date.toString());
+            if (record == null) throw new IllegalArgumentException("선택한 생년월일은 대운을 계산하기에 만세력 데이터 범위 끝에 너무 가깝습니다.");
+            if (!record.monthPillar().equals(monthPillar)) return date.plusDays(1);
+            date = date.minusDays(1);
+        }
+        throw new IllegalArgumentException("대운 계산에 필요한 절기 경계를 찾지 못했습니다.");
+    }
+
     private FortuneCalculationResponse.BasicAnalysis analyzeBasic(Pillars p) {
         var stems = ordered("year_gan", p.yearStem(), "month_gan", p.monthStem(), "day_gan", p.dayStem(), "hour_gan", p.hourStem());
         var branches = ordered("year_ji", p.yearBranch(), "month_ji", p.monthBranch(), "day_ji", p.dayBranch(), "hour_ji", p.hourBranch());
@@ -242,12 +286,15 @@ public class FortuneCalculationService {
         var stems = ordered("year", p.yearStem(), "month", p.monthStem(), "day", p.dayStem(), "hour", p.hourStem());
         var branches = ordered("year", p.yearBranch(), "month", p.monthBranch(), "day", p.dayBranch(), "hour", p.hourBranch());
         var good = new LinkedHashMap<String, List<String>>(); var caution = new LinkedHashMap<String, List<String>>();
+        var cheondeokTarget = CHEONDEOK.get(p.monthBranch());
+        var cheondeokAsBranch = CHEONDEOK_BRANCH_MONTHS.contains(p.monthBranch());
         for (var item : branches.entrySet()) {
             var key = item.getKey(); var branch = item.getValue(); var goodHits = new ArrayList<String>(); var cautionHits = new ArrayList<String>();
             if (CHEONEUL.get(p.dayStem()).contains(branch)) goodHits.add("천을귀인");
             if (MUNCHANG.get(p.dayStem()).equals(branch)) goodHits.add("문창귀인");
             if (AMROK.get(p.dayStem()).equals(branch)) goodHits.add("암록");
             if (WOLDEOK.get(TRIO.get(p.monthBranch())).equals(stems.get(key))) goodHits.add("월덕귀인");
+            if (cheondeokAsBranch ? cheondeokTarget.equals(branch) : cheondeokTarget.equals(stems.get(key))) goodHits.add("천덕귀인");
             if (YANGIN.get(p.dayStem()) != null && YANGIN.get(p.dayStem()).equals(branch)) cautionHits.add("양인살");
             if (HONGYEOM.get(p.dayStem()).equals(branch)) cautionHits.add("홍염살");
             if (BAEKHO.contains(stems.get(key) + branch)) cautionHits.add("백호살");
@@ -256,7 +303,7 @@ public class FortuneCalculationService {
         }
         var pairs = new ArrayList<FortuneCalculationResponse.PillarPair>(); var items = new ArrayList<>(branches.entrySet());
         for (int i = 0; i < items.size(); i++) for (int j = i + 1; j < items.size(); j++) if (isWonjin(items.get(i).getValue(), items.get(j).getValue())) pairs.add(new FortuneCalculationResponse.PillarPair(items.get(i).getKey(), items.get(j).getKey()));
-        return new FortuneCalculationResponse.StageThreeAnalysis(CHEONDEOK.get(p.monthBranch()), good, caution, pairs);
+        return new FortuneCalculationResponse.StageThreeAnalysis(cheondeokTarget, good, caution, pairs);
     }
 
     private FortuneCalculationResponse.YongsinAnalysis analyzeYongsin(FortuneCalculationResponse.BasicAnalysis basic) {
@@ -264,9 +311,31 @@ public class FortuneCalculationService {
         basic.tenGods().forEach((key, god) -> { var category = CATEGORY.get(god); if (category != null) counts.compute(category, (k, n) -> n + (key.equals("month_ji") ? 2 : 1)); });
         int score = counts.get("비겁") + counts.get("인성") - counts.get("식상") - counts.get("재성") - counts.get("관성");
         var dayElement = STEM_INFO.get(basic.dayMaster()).element(); var strong = score > 0;
-        var element = strong ? reverse(CONTROLS, dayElement) : reverse(GENERATES, dayElement);
-        var reason = strong ? "일간이 신강하여 이를 직접 제어(剋)하는 관성 오행을 용신으로 삼음" : "일간이 신약하여 이를 직접 생조(生助)하는 인성 오행을 용신으로 삼음";
-        return new FortuneCalculationResponse.YongsinAnalysis(score, strong ? "신강" : "신약", counts, element, reason, "인성", "관성");
+        var weakPriority = lowestCategory(counts, "인성", "비겁");
+        var strongPriority = lowestCategory(counts, "관성", "식상", "재성");
+        var priority = strong ? strongPriority : weakPriority;
+        var element = categoryElement(dayElement, priority);
+        var reason = strong
+                ? "일간이 신강하여 이를 견제하는 범주 중 가장 부족한 " + priority + " 오행을 용신으로 삼음"
+                : "일간이 신약하여 이를 돕는 범주 중 가장 부족한 " + priority + " 오행을 용신으로 삼음";
+        return new FortuneCalculationResponse.YongsinAnalysis(score, strong ? "신강" : "신약", counts, element, reason, weakPriority, strongPriority);
+    }
+
+    private String lowestCategory(Map<String, Integer> counts, String... candidates) {
+        var best = candidates[0];
+        for (var candidate : candidates) if (counts.get(candidate) < counts.get(best)) best = candidate;
+        return best;
+    }
+
+    private String categoryElement(String dayElement, String category) {
+        return switch (category) {
+            case "비겁" -> dayElement;
+            case "인성" -> reverse(GENERATES, dayElement);
+            case "관성" -> reverse(CONTROLS, dayElement);
+            case "식상" -> GENERATES.get(dayElement);
+            case "재성" -> CONTROLS.get(dayElement);
+            default -> throw new IllegalStateException("알 수 없는 십성 범주: " + category);
+        };
     }
 
     private String tenGod(String dayStem, String targetStem) {

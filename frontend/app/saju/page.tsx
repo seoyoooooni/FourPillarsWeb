@@ -6,7 +6,7 @@ const names: Record<string, string> = { year: "연", month: "월", day: "일", h
 const textMap = (v: Record<string, string>) => Object.entries(v).map(([k, value]) => `${names[k] ?? k} ${value}`).join(" · ");
 export default function SajuPage() {
   const [result, setResult] = useState<Calculation>(); const [error, setError] = useState("");
-  useEffect(()=>{if(!hasToken()){setError("로그인이 필요합니다.");return}api<Profile>("/api/profile",{},true).then(profile=>api<Calculation>("/api/fortune/calculate",{method:"POST",body:JSON.stringify({birthDate:profile.birthDate,birthTime:profile.birthTime,calendarType:profile.calendarType,leapMonth:profile.leapMonth})})).then(setResult).catch(x=>setError(x instanceof Error?x.message:"계산에 실패했습니다."))},[]);
+  useEffect(()=>{if(!hasToken()){setError("로그인이 필요합니다.");return}api<Profile>("/api/profile",{},true).then(profile=>api<Calculation>("/api/fortune/calculate",{method:"POST",body:JSON.stringify({birthDate:profile.birthDate,birthTime:profile.birthTime,calendarType:profile.calendarType,leapMonth:profile.leapMonth,gender:profile.gender})})).then(setResult).catch(x=>setError(x instanceof Error?x.message:"계산에 실패했습니다."))},[]);
   return <main className={`app-shell wide ${result ? "result-shell" : "form-shell"}`}><Header title="평생 사주" />{error ? <section className="empty-state"><p>{error}</p><Link className="primary link-button" href="/profile">프로필 설정하기</Link></section> : !result ? <div className="loading">프로필 사주를 계산하는 중…</div> : <Results result={result} />}</main>;
 }
 function Results({ result }: { result: Calculation }) {
@@ -15,6 +15,10 @@ function Results({ result }: { result: Calculation }) {
     ["기본 분석", [["십이운성", textMap(result.stageTwoAnalysis.twelveStages)], ["공망", result.stageTwoAnalysis.gongmang.join(" · ")], ["십이신살 · 연지 기준", textMap(result.stageTwoAnalysis.twelveSinsalByYearBranch)], ["십이신살 · 일지 기준", textMap(result.stageTwoAnalysis.twelveSinsalByDayBranch)]]],
     ["용신 분석", [["용신 오행", result.yongsinAnalysis.yongsinElement], ["일간 강약", `${result.yongsinAnalysis.strength} (${result.yongsinAnalysis.strengthScore})`], ["십성 범주", Object.entries(result.yongsinAnalysis.categoryCounts).map(([k,v]) => `${k} ${v}`).join(" · ")], ["신약 우선 기준", result.yongsinAnalysis.weakPriority], ["신강 우선 기준", result.yongsinAnalysis.strongPriority], ["판정 근거", result.yongsinAnalysis.yongsinReason]]],
     ["신살 분석", [["천덕 대응값", result.stageThreeAnalysis.cheondeokValue], ["길신", hits(result.stageThreeAnalysis.gilsinByPillar)], ["주의해서 볼 신살", hits(result.stageThreeAnalysis.hyungsalByPillar)], ["원진살", result.stageThreeAnalysis.wonjinPairs.length ? result.stageThreeAnalysis.wonjinPairs.map(p => `${names[p.first]}-${names[p.second]}`).join(" · ") : "없음"]]],
+    ...(result.daeunAnalysis ? [["대운", [
+      ["대운 방향", `${result.daeunAnalysis.forward ? "순행" : "역행"} · ${result.daeunAnalysis.startAge}세부터 10년 단위로 바뀌어요`],
+      ["대운 목록", result.daeunAnalysis.periods.map(p => `${p.startAge}세 ${p.stem}${p.branch}(${p.stemTenGod}·${p.branchTenGod})`).join(" · ")],
+    ]] as [string, [string, string][]]] : []),
   ] as [string, [string, string][]][];
   return <section className="results"><p className="result-guide">ⓘ 각 사주 결과를 누르면 쉬운 설명이 펼쳐집니다.</p><PillarSection pillars={result.pillars} /><DayMasterSection value={result.analysis.dayMaster} /><ElementSection counts={result.analysis.elementCounts} />{sections.map(([title, rows]) => <article key={title}><h2>{title}</h2>{rows.map(([label,value]) => <details key={label}><summary>{label}<span>{value}</span></summary><p>{explanationFor(label,result)}</p></details>)}</article>)}</section>;
 }

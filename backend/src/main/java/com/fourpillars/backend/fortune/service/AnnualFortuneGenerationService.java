@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 @Service
 public class AnnualFortuneGenerationService {
-    public static final String CALCULATION_VERSION = "daily-v1";
+    public static final String CALCULATION_VERSION = "daily-v2";
     private final FortuneCalculationService calculationService;
     private final DailyFortuneCacheRepository repository;
     private final ObjectMapper objectMapper;
@@ -40,7 +40,9 @@ public class AnnualFortuneGenerationService {
     public void generateMissing(java.util.UUID userId, com.fourpillars.backend.profile.dto.BirthProfileResponse profile, int year) {
         var from = LocalDate.of(year, 1, 1); var to = LocalDate.of(year, 12, 31);
         repository.lockYear(userId + ":" + year);
-        if (repository.findByUserIdAndFortuneDateBetweenOrderByFortuneDate(userId, from, to).size() < to.getDayOfYear()) {
+        var existing = repository.findByUserIdAndFortuneDateBetweenOrderByFortuneDate(userId, from, to);
+        boolean outdated = existing.stream().anyMatch(row -> !CALCULATION_VERSION.equals(row.getCalculationVersion()));
+        if (existing.size() < to.getDayOfYear() || outdated) {
             generate(userId, profile, year);
         }
     }

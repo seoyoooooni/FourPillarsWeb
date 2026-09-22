@@ -63,4 +63,5 @@ public class DailyFortuneCache {
     public int getAnnualRank() { return annualRank; }
     public int getAnnualTotalDays() { return annualTotalDays; }
     public int getAnnualTopPercent() { return annualTopPercent; }
+    public String getCalculationVersion() { return calculationVersion; }
 }

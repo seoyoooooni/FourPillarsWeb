@@ -7,6 +7,7 @@ export type Calculation = {
   stageTwoAnalysis: { twelveStages: Record<string, string>; gongmang: string[]; twelveSinsalByYearBranch: Record<string, string>; twelveSinsalByDayBranch: Record<string, string> };
   stageThreeAnalysis: { cheondeokValue: string; gilsinByPillar: Record<string, string[]>; hyungsalByPillar: Record<string, string[]>; wonjinPairs: { first: string; second: string }[] };
   yongsinAnalysis: { strengthScore: number; strength: string; categoryCounts: Record<string, number>; yongsinElement: string; yongsinReason: string; weakPriority: string; strongPriority: string };
+  daeunAnalysis: { forward: boolean; startAge: number; periods: { order: number; startAge: number; stem: string; branch: string; stemTenGod: string; branchTenGod: string; twelveStage: string }[] } | null;
 };
 export type MajorRecommendation = {
   studentType: string;

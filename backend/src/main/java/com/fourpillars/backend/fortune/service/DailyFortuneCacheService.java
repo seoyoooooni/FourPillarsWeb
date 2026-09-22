@@ -20,6 +20,7 @@ import java.util.UUID;
 
 @Service
 public class DailyFortuneCacheService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DailyFortuneCacheService.class);
     private final DailyFortuneCacheRepository repository;
     private final FortuneViewHistoryRepository viewRepository;
     private final FortuneCalculationService calculationService;
@@ -38,7 +39,13 @@ public class DailyFortuneCacheService {
         var today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         viewRepository.save(new FortuneViewHistory(userId, today));
         var cached = repository.findByUserIdAndFortuneDate(userId, today);
-        if (cached.isEmpty()) {
+        boolean isCurrent = cached.isPresent()
+                && AnnualFortuneGenerationService.CALCULATION_VERSION.equals(cached.get().getCalculationVersion());
+        if (!isCurrent) {
+            if (cached.isPresent()) {
+                repository.deleteYear(userId, today, today);
+                repository.flush();
+            }
             var response = calculationService.forDate(profile, today);
             saveOne(userId, today, response);
             generationService.generateMissing(userId, profile, today.getYear());
@@ -68,8 +75,10 @@ public class DailyFortuneCacheService {
                     f.career(), f.relationships(), f.study(), f.todayPillar(), f.todayTenGod(),
                     f.energyDescription(), objectMapper.writeValueAsString(f.interactions()), rank.rank(),
                     rank.totalDays(), rank.topPercent(), AnnualFortuneGenerationService.CALCULATION_VERSION));
-        } catch (Exception ignored) {
+        } catch (org.springframework.dao.DataIntegrityViolationException ignored) {
             // 동시에 완료된 연간 생성 작업의 동일 날짜 행을 그대로 사용함.
+        } catch (Exception e) {
+            log.error("오늘의 운세 캐시 저장 실패: userId={}, date={}", userId, date, e);
         }
     }
 
