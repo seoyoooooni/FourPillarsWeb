@@ -62,13 +62,17 @@ public class MajorRecommendationService {
                                                    Map<String, Integer> environments) {
         var traits = studentTraits(fortune);
         var aptitudes = studentAptitudes(fortune, traits);
+        boolean personalized = interests != null && !interests.isEmpty()
+                && environments != null && !environments.isEmpty();
         var safeInterests = validPreferences(interests);
         var safeEnvironments = validPreferences(environments);
         var candidates = DEPARTMENTS.stream().map(department -> candidate(
-                department, aptitudes, safeInterests, safeEnvironments)).toList();
-        var selected = selectThree(candidates);
+                department, aptitudes, safeInterests, safeEnvironments, personalized)).toList();
+        var selected = selectThree(candidates, personalized);
         return new MajorRecommendationResponse(studentType(traits), traits, aptitudes, selected,
-                "사주 원자료 55%, 관심 분야 30%, 학습·업무 환경 15%로 계산한 탐색 점수예요. 적합 확률이나 합격 가능성은 아니며, 지원 전 모집요강을 확인해 주세요.");
+                personalized
+                        ? "사주 적성 70%, 관심 분야 20%, 학습 환경 10%로 계산한 탐색 점수예요. 적합 확률이나 합격 가능성은 아니며, 지원 전 모집요강을 확인해 주세요."
+                        : "생년월일과 태어난 시로 본 사주 적성 100% 기반의 탐색 점수예요. 적합 확률이나 합격 가능성은 아니며, 지원 전 모집요강을 확인해 주세요.");
     }
 
     private Map<String, Integer> studentAptitudes(FortuneCalculationResponse fortune, Map<String, Integer> traits) {
@@ -122,11 +126,12 @@ public class MajorRecommendationService {
     }
 
     private Candidate candidate(Department department, Map<String, Integer> aptitudes,
-                                Map<String, Integer> interests, Map<String, Integer> environments) {
+                                Map<String, Integer> interests, Map<String, Integer> environments,
+                                boolean personalized) {
         double saju = fit(aptitudes, department.aptitudes());
         double interest = fit(interests, department.aptitudes());
         double environment = fit(environments, department.aptitudes());
-        double score = round(saju * .55 + interest * .30 + environment * .15);
+        double score = personalized ? round(saju * .70 + interest * .20 + environment * .10) : round(saju);
         var reasons = department.activities().stream()
                 .sorted(Comparator.comparingInt((Activity activity) -> aptitudes.get(axisForTrait(activity.trait()))).reversed()
                         .thenComparing(Activity::label))
@@ -142,15 +147,25 @@ public class MajorRecommendationService {
         return APTITUDES.stream().mapToDouble(axis -> user.get(axis) * department.get(axis)).sum() / importance;
     }
 
-    private List<MajorRecommendationResponse.DepartmentRecommendation> selectThree(List<Candidate> candidates) {
+    private List<MajorRecommendationResponse.DepartmentRecommendation> selectThree(List<Candidate> candidates,
+                                                                                    boolean personalized) {
         var remaining = new ArrayList<>(candidates);
         var best = remaining.stream().max(Comparator.comparingDouble(Candidate::score)).orElseThrow();
         remaining.remove(best);
-        var growth = remaining.stream().max(Comparator.comparingDouble(c -> c.interest * .65 + c.environment * .35)).orElseThrow();
-        remaining.remove(growth);
-        var hidden = remaining.stream().max(Comparator.comparingDouble(Candidate::saju)).orElseThrow();
-        return List.of(toResponse("가장 잘 맞는 학과", best), toResponse("성장 가능성이 큰 학과", growth),
-                toResponse("숨은 적성이 있는 학과", hidden));
+        if (!personalized) {
+            var unexpected = remaining.stream().max(Comparator.comparingDouble(Candidate::saju)).orElseThrow();
+            remaining.remove(unexpected);
+            var strength = remaining.stream().max(Comparator.comparingDouble(Candidate::saju)).orElseThrow();
+            return List.of(toResponse("사주 적성이 가장 잘 맞는 학과", best),
+                    toResponse("의외로 잘 맞는 학과", unexpected),
+                    toResponse("강점을 살리기 좋은 학과", strength));
+        }
+        var interest = remaining.stream().max(Comparator.comparingDouble(Candidate::interest)).orElseThrow();
+        remaining.remove(interest);
+        var environment = remaining.stream().max(Comparator.comparingDouble(Candidate::environment)).orElseThrow();
+        return List.of(toResponse("종합적으로 가장 잘 맞는 학과", best),
+                toResponse("관심사를 반영한 학과", interest),
+                toResponse("학습 방식과 잘 맞는 학과", environment));
     }
 
     private MajorRecommendationResponse.DepartmentRecommendation toResponse(String role, Candidate candidate) {

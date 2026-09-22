@@ -28,7 +28,7 @@ class MajorRecommendationServiceTests {
         assertThat(result.traits().values()).allMatch(score -> score >= 30 && score <= 90);
         assertThat(result.recommendations()).extracting(recommendation -> recommendation.department()).doesNotHaveDuplicates();
         assertThat(result.recommendations()).extracting(recommendation -> recommendation.role())
-                .containsExactly("가장 잘 맞는 학과", "성장 가능성이 큰 학과", "숨은 적성이 있는 학과");
+                .containsExactly("사주 적성이 가장 잘 맞는 학과", "의외로 잘 맞는 학과", "강점을 살리기 좋은 학과");
         assertThat(result.recommendations()).allSatisfy(recommendation -> {
             assertThat(recommendation.score()).isBetween(30d, 90d);
             assertThat(recommendation.reasons()).hasSize(2);
@@ -42,6 +42,19 @@ class MajorRecommendationServiceTests {
                 Map.of("비겁", 2, "식상", 3, "재성", 1, "관성", 1, "인성", 1));
 
         assertThat(service.recommend(fortune)).isEqualTo(service.recommend(fortune));
+    }
+
+    @Test
+    void personalizesRecommendationWithTwoPreferenceProfiles() {
+        var result = service.recommend(fortune(
+                        Map.of("목", 2, "화", 2, "토", 2, "금", 1, "수", 1),
+                        Map.of("비겁", 2, "식상", 3, "재성", 1, "관성", 1, "인성", 1)),
+                Map.of("설계·창작", 100, "제작·정비", 90),
+                Map.of("제작·정비", 100, "서비스·현장", 75));
+
+        assertThat(result.recommendations()).extracting(recommendation -> recommendation.role())
+                .containsExactly("종합적으로 가장 잘 맞는 학과", "관심사를 반영한 학과", "학습 방식과 잘 맞는 학과");
+        assertThat(result.disclaimer()).contains("사주 적성 70%", "관심 분야 20%", "학습 환경 10%");
     }
 
     @Test
