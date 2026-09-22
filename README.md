@@ -1,7 +1,7 @@
 # FourPillars
 
 <p align="center">
-  <img src="README_images/01-onboarding-welcome" width="360" alt="FourPillars 오늘의 운세 메인 화면" />
+  <img src="README_images/01-onboarding-welcome.png" width="360" alt="FourPillars 시작 화면" />
 </p>
 
 ## 1. 프로젝트 소개
