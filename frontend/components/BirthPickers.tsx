@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type Calendar = "SOLAR" | "LUNAR"; type Mode = "solar" | "lunar" | "leap";
 export function BirthDateField({value,calendar,leap,onChange,ariaLabel="생년월일"}:{value:string;calendar:Calendar;leap:boolean;onChange:(date:string,calendar:Calendar,leap:boolean)=>void;ariaLabel?:string}){
@@ -18,7 +19,7 @@ export function BirthTimeField({value,onChange,ariaLabel="태어난 시간"}:{va
 }
 function PickerOverlay({title,onClose,onConfirm,children}:{title:string;onClose:()=>void;onConfirm:()=>void;children:React.ReactNode}){
   useEffect(()=>{const previous=document.body.style.overflow;document.body.style.overflow="hidden";return()=>{document.body.style.overflow=previous}},[]);
-  return <div className="picker-overlay" onClick={onClose}><button type="button" className="picker-confirm" onClick={event=>{event.stopPropagation();onConfirm()}} aria-label="선택 완료">✓</button><section className="picker-sheet" role="dialog" aria-modal="true" aria-label={title} onClick={e=>e.stopPropagation()}>{children}</section></div>
+  return createPortal(<div className="picker-overlay" onClick={onClose}><button type="button" className="picker-confirm" onClick={event=>{event.stopPropagation();onConfirm()}} aria-label="선택 완료">✓</button><section className="picker-sheet" role="dialog" aria-modal="true" aria-label={title} onClick={e=>e.stopPropagation()}>{children}</section></div>,document.body)
 }
 function WheelColumn({values,value,suffix="",labels,padValue=false,onChange}:{values:number[];value:number;suffix?:string;labels?:string[];padValue?:boolean;onChange:(value:number)=>void}){
   const ref=useRef<HTMLDivElement>(null),first=values[0],last=values[values.length-1];
