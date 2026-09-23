@@ -1,0 +1,109 @@
+:root {
+  --vh: 1vh;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@supports (height: 1svh) {
+  :root {
+    --vh: 1svh;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@supports not (height: 1svh) {
+  body,
+  .app-shell,
+  .auth-shell,
+  .auth-panel,
+  .signup-onboarding {
+    min-height: 100vh;
+  }
+
+  .maui-home {
+    height: 100vh;
+  }
+
+  .auth-fields {
+    top: 42vh;
+  }
+}
+
+.maui-deck {
+  --card-base: min(63.6vw, 273px);
+  --card-w: clamp(100px, min(var(--card-base), calc((100 * var(--vh) - 140px - var(--safe-top) - var(--safe-bottom)) / 2.105)), 292px);
+}
+
+@supports (width: 1cqw) {
+  .maui-deck {
+    --card-base: 63.6cqw;
+  }
+}
+
+.maui-card {
+  top: max(calc(70px + var(--safe-top) + var(--card-w) * .385), min(20 * var(--vh), 190px));
+  width: var(--card-w);
+}
+
+.maui-card .card-inner {
+  grid-template-rows: minmax(0, 1fr) clamp(30px, calc(var(--card-w) * .2), 48px);
+}
+
+.maui-card .card-inner > strong {
+  font-size: clamp(13px, calc(var(--card-w) * .07), 20px);
+}
+
+@media (max-height: 800px) {
+  .drawer-menu-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-block: 14px;
+  }
+
+  .drawer-card-inner {
+    aspect-ratio: 1 / 1.55;
+    grid-template-rows: 1fr 22px;
+  }
+
+  .drawer-card-inner > strong {
+    font-size: 10px;
+  }
+}
+
+.maui-form > label,
+.profile-row {
+  grid-template-columns: 112px minmax(0, 1fr);
+}
+
+.maui-form > label > input,
+.profile-row .picker-value,
+.gender-options {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 360px) {
+  .maui-form > label,
+  .profile-row {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .maui-form > label,
+  .profile-row {
+    grid-template-columns: 128px minmax(0, 1fr);
+  }
+}
+
+.team-member input {
+  font-size: 16px;
+}
+
+.team-member > input {
+  font-size: 19px;
+}

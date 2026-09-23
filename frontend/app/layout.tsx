@@ -12,6 +12,7 @@ import "./styles/tarot-tweaks.css";
 import "./styles/drawer-menu.css";
 import "./styles/team.css";
 import "./styles/buttons.css";
+import "./styles/mobile-layout.css";
 
 export const metadata: Metadata = {
   title: "사주",
