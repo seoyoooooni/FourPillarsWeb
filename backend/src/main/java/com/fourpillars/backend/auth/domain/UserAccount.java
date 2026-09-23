@@ -1,4 +1,4 @@
-// 회원 이메일과 암호화된 비밀번호를 users 테이블에 저장함.
+// 회원 로그인 아이디와 암호화된 비밀번호를 users 테이블에 저장함.
 package com.fourpillars.backend.auth.domain;
 
 import jakarta.persistence.Column;
@@ -16,11 +16,8 @@ public class UserAccount {
     @Id
     private UUID id;
 
-    @Column(nullable = false, length = 320)
-    private String email;
-
-    @Column(name = "email_normalized", nullable = false, unique = true, length = 320)
-    private String emailNormalized;
+    @Column(name = "login_id", nullable = false, unique = true, length = 20)
+    private String loginId;
 
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
@@ -34,11 +31,10 @@ public class UserAccount {
     protected UserAccount() {
     }
 
-    public UserAccount(String email, String emailNormalized, String passwordHash) {
+    public UserAccount(String loginId, String passwordHash) {
         var now = Instant.now();
         this.id = UUID.randomUUID();
-        this.email = email;
-        this.emailNormalized = emailNormalized;
+        this.loginId = loginId;
         this.passwordHash = passwordHash;
         this.createdAt = now;
         this.updatedAt = now;
@@ -48,12 +44,8 @@ public class UserAccount {
         return id;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getEmailNormalized() {
-        return emailNormalized;
+    public String getLoginId() {
+        return loginId;
     }
 
     public String getPasswordHash() {

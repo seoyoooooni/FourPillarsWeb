@@ -33,7 +33,7 @@ FourPillars는 인하공전 학생들을 대상으로 만든 웹 애플리케이
   <tr>
     <td align="center"><img src="README_images/01-onboarding-welcome.png" width="190" alt="온보딩 시작" /><br /><sub>시작 화면</sub></td>
     <td align="center"><img src="README_images/02-onboarding-name.png" width="190" alt="이름 입력" /><br /><sub>이름 입력</sub></td>
-    <td align="center"><img src="README_images/03-onboarding-email.png" width="190" alt="이메일 입력" /><br /><sub>이메일 입력</sub></td>
+    <td align="center"><img src="README_images/03-onboarding-email.png" width="190" alt="아이디 입력" /><br /><sub>아이디 입력</sub></td>
     <td align="center"><img src="README_images/04-onboarding-password.png" width="190" alt="비밀번호 입력" /><br /><sub>비밀번호 생성</sub></td>
   </tr>
   <tr>

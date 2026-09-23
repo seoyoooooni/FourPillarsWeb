@@ -1,4 +1,4 @@
-// 회원 식별자와 이메일을 담은 짧은 수명의 JWT Access Token을 발급함.
+// 회원 식별자와 로그인 아이디를 담은 짧은 수명의 JWT Access Token을 발급함.
 package com.fourpillars.backend.auth.service;
 
 import com.fourpillars.backend.auth.domain.UserAccount;
@@ -31,7 +31,7 @@ public class AccessTokenService {
                 .issuedAt(issuedAt)
                 .expiresAt(issuedAt.plus(ACCESS_TOKEN_LIFETIME))
                 .subject(user.getId().toString())
-                .claim("email", user.getEmail())
+                .claim("loginId", user.getLoginId())
                 .build();
         var header = JwsHeader.with(SignatureAlgorithm.RS256).build();
         return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();

@@ -5,12 +5,12 @@ import Link from "next/link";
 import { BirthDateField, BirthTimeField } from "@/components/BirthPickers";
 import { api, login, signup } from "@/lib/api";
 
-const steps = ["welcome", "name", "email", "password", "confirm", "birthDate", "birthTime", "gender"] as const;
+const steps = ["welcome", "name", "loginId", "password", "confirm", "birthDate", "birthTime", "gender"] as const;
 type Step = typeof steps[number];
 
 export function SignupOnboarding() {
   const [index, setIndex] = useState(0);
-  const [email, setEmail] = useState("");
+  const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [name, setName] = useState("");
@@ -25,7 +25,7 @@ export function SignupOnboarding() {
   const step: Step = steps[index];
 
   function validationMessage() {
-    if (step === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "올바른 이메일 주소를 입력해 주세요.";
+    if (step === "loginId" && !/^[a-z][a-z0-9_]{3,19}$/.test(loginId)) return "아이디는 영문자로 시작하는 4~20자의 영문, 숫자, 밑줄(_) 조합으로 입력해 주세요.";
     if (step === "password" && password.length < 8) return "비밀번호는 8자 이상 입력해 주세요.";
     if (step === "confirm" && confirm !== password) return "비밀번호가 서로 다릅니다.";
     if (step === "name" && !name.trim()) return "이름을 입력해 주세요.";
@@ -42,8 +42,8 @@ export function SignupOnboarding() {
     if (index < steps.length - 1) { setError(""); setIndex(value => value + 1); return; }
     setBusy(true); setError("");
     try {
-      await signup(email, password);
-      await login(email, password);
+      await signup(loginId, password);
+      await login(loginId, password);
       await api("/api/profile", {
         method: "PUT",
         body: JSON.stringify({
@@ -65,7 +65,7 @@ export function SignupOnboarding() {
           <div className="signup-welcome-aura"><img className="signup-welcome-mascot" src="/images/mascot-guide-talking.png" alt="가입 과정을 안내하는 여우 마스코트" /></div>
           <h1>안녕하세요!</h1>
         </div>}
-        {step === "email" && <StepInput title="이메일을 입력해 주세요" error={error}><input type="email" value={email} autoComplete="email" autoFocus placeholder="name@example.com" onChange={e => { setEmail(e.target.value); setError(""); }} /></StepInput>}
+        {step === "loginId" && <StepInput title="아이디를 입력해 주세요" hint="영문자로 시작하는 4~20자의 영문, 숫자, 밑줄(_)을 사용할 수 있어요." error={error}><input value={loginId} autoComplete="username" autoCapitalize="none" spellCheck={false} autoFocus placeholder="fourpillars" maxLength={20} onChange={e => { setLoginId(e.target.value.toLowerCase()); setError(""); }} /></StepInput>}
         {step === "password" && <StepInput title="비밀번호를 만들어 주세요" hint="8자 이상 입력해 주세요." error={error}><PasswordInput value={password} visible={visible} autoFocus onChange={value => { setPassword(value); setError(""); }} onToggle={() => setVisible(value => !value)} /></StepInput>}
         {step === "confirm" && <StepInput title="비밀번호를 한 번 더 입력해 주세요" error={error}><PasswordInput value={confirm} visible={visible} autoFocus onChange={value => { setConfirm(value); setError(""); }} onToggle={() => setVisible(value => !value)} /></StepInput>}
         {step === "name" && <StepInput title="이름을 알려 주세요" error={error}><input value={name} autoComplete="name" autoFocus placeholder="이름" maxLength={50} onChange={e => { setName(e.target.value); setError(""); }} /></StepInput>}

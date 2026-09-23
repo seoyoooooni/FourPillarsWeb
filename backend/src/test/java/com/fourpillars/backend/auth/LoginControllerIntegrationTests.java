@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class LoginControllerIntegrationTests {
 
-    private static final String EMAIL = "login-test@example.com";
+    private static final String LOGIN_ID = "login_test";
     private static final String PASSWORD = "safe-password-123";
 
     @Autowired
@@ -45,7 +45,7 @@ class LoginControllerIntegrationTests {
 
     @BeforeEach
     void createUser() {
-        authService.signUp(new SignUpRequest(EMAIL, PASSWORD));
+        authService.signUp(new SignUpRequest(LOGIN_ID, PASSWORD));
     }
 
     @AfterEach
@@ -76,18 +76,18 @@ class LoginControllerIntegrationTests {
 
     @Test
     void accessTokenOpensProtectedSessionApi() throws Exception {
-        var tokens = loginService.login(new LoginRequest(EMAIL, PASSWORD));
+        var tokens = loginService.login(new LoginRequest(LOGIN_ID, PASSWORD));
 
         mockMvc.perform(get("/api/auth/session")
                         .header("Authorization", "Bearer " + tokens.accessToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").isNotEmpty())
-                .andExpect(jsonPath("$.email").value(EMAIL));
+                .andExpect(jsonPath("$.loginId").value(LOGIN_ID));
     }
 
     @Test
     void refreshRotatesRefreshTokenAndRejectsReuse() throws Exception {
-        var tokens = loginService.login(new LoginRequest(EMAIL, PASSWORD));
+        var tokens = loginService.login(new LoginRequest(LOGIN_ID, PASSWORD));
 
         mockMvc.perform(post("/api/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +105,7 @@ class LoginControllerIntegrationTests {
 
     @Test
     void logoutRevokesRefreshToken() throws Exception {
-        var tokens = loginService.login(new LoginRequest(EMAIL, PASSWORD));
+        var tokens = loginService.login(new LoginRequest(LOGIN_ID, PASSWORD));
 
         mockMvc.perform(post("/api/auth/logout")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +119,7 @@ class LoginControllerIntegrationTests {
     }
 
     private static String loginBody(String password) {
-        return "{\"email\":\"" + EMAIL + "\",\"password\":\"" + password + "\"}";
+        return "{\"loginId\":\"" + LOGIN_ID + "\",\"password\":\"" + password + "\"}";
     }
 
     private static String refreshBody(String refreshToken) {

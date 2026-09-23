@@ -73,10 +73,10 @@ async function refreshAccessToken() {
   }
 }
 
-export async function login(email: string, password: string) {
-  const tokens = await api<{ accessToken: string; refreshToken: string }>("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
+export async function login(loginId: string, password: string) {
+  const tokens = await api<{ accessToken: string; refreshToken: string }>("/api/auth/login", { method: "POST", body: JSON.stringify({ loginId, password }) });
   localStorage.setItem(tokenKey, tokens.accessToken); localStorage.setItem(refreshKey, tokens.refreshToken);
 }
-export async function signup(email: string, password: string) { await api("/api/auth/signup", { method: "POST", body: JSON.stringify({ email, password }) }); }
+export async function signup(loginId: string, password: string) { await api("/api/auth/signup", { method: "POST", body: JSON.stringify({ loginId, password }) }); }
 export function logout() { localStorage.removeItem(tokenKey); localStorage.removeItem(refreshKey); }
 export function hasToken() { return typeof window !== "undefined" && Boolean(localStorage.getItem(tokenKey)); }

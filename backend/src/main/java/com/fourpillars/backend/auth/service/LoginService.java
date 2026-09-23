@@ -34,8 +34,8 @@ public class LoginService {
 
     @Transactional
     public AuthTokenResponse login(LoginRequest request) {
-        var normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
-        var user = userAccountRepository.findByEmailNormalized(normalizedEmail)
+        var loginId = request.loginId().trim().toLowerCase(Locale.ROOT);
+        var user = userAccountRepository.findByLoginId(loginId)
                 .orElseThrow(InvalidCredentialsException::new);
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new InvalidCredentialsException();

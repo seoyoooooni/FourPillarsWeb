@@ -85,7 +85,7 @@ class BirthProfileControllerIntegrationTests {
     }
 
     private String signUpAndLogin() {
-        authService.signUp(new SignUpRequest("profile@example.com", "safe-password-123"));
-        return loginService.login(new LoginRequest("profile@example.com", "safe-password-123")).accessToken();
+        authService.signUp(new SignUpRequest("profile_test", "safe-password-123"));
+        return loginService.login(new LoginRequest("profile_test", "safe-password-123")).accessToken();
     }
 }

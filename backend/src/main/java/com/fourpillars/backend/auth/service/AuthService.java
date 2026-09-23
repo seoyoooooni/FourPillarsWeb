@@ -4,7 +4,7 @@ package com.fourpillars.backend.auth.service;
 import com.fourpillars.backend.auth.domain.UserAccount;
 import com.fourpillars.backend.auth.dto.SignUpRequest;
 import com.fourpillars.backend.auth.dto.SignUpResponse;
-import com.fourpillars.backend.auth.exception.DuplicateEmailException;
+import com.fourpillars.backend.auth.exception.DuplicateLoginIdException;
 import com.fourpillars.backend.auth.exception.InvalidPasswordException;
 import com.fourpillars.backend.auth.repository.UserAccountRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,21 +30,20 @@ public class AuthService {
 
     @Transactional
     public SignUpResponse signUp(SignUpRequest request) {
-        var email = request.email().trim();
-        var normalizedEmail = email.toLowerCase(Locale.ROOT);
-        if (userAccountRepository.existsByEmailNormalized(normalizedEmail)) {
-            throw new DuplicateEmailException();
+        var loginId = request.loginId().trim().toLowerCase(Locale.ROOT);
+        if (userAccountRepository.existsByLoginId(loginId)) {
+            throw new DuplicateLoginIdException();
         }
         if (request.password().getBytes(StandardCharsets.UTF_8).length > BCRYPT_MAXIMUM_PASSWORD_BYTES) {
             throw new InvalidPasswordException();
         }
 
-        var user = new UserAccount(email, normalizedEmail, passwordEncoder.encode(request.password()));
+        var user = new UserAccount(loginId, passwordEncoder.encode(request.password()));
         try {
             var savedUser = userAccountRepository.saveAndFlush(user);
-            return new SignUpResponse(savedUser.getId(), savedUser.getEmail());
+            return new SignUpResponse(savedUser.getId(), savedUser.getLoginId());
         } catch (DataIntegrityViolationException exception) {
-            throw new DuplicateEmailException();
+            throw new DuplicateLoginIdException();
         }
     }
 }

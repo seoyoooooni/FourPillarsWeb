@@ -1,4 +1,4 @@
-// 회원가입 성공과 이메일 중복 및 입력 검증을 PostgreSQL까지 연결해 확인함.
+// 회원가입 성공과 아이디 중복 및 입력 검증을 PostgreSQL까지 연결해 확인함.
 package com.fourpillars.backend.auth;
 
 import com.fourpillars.backend.auth.repository.RefreshTokenRepository;
@@ -45,33 +45,33 @@ class AuthControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "email": "User@Example.com",
+                                  "loginId": "TestUser",
                                   "password": "safe-password-123"
                                 }
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userId").isNotEmpty())
-                .andExpect(jsonPath("$.email").value("User@Example.com"));
+                .andExpect(jsonPath("$.loginId").value("testuser"));
 
-        var savedUser = userAccountRepository.findByEmailNormalized("user@example.com").orElseThrow();
+        var savedUser = userAccountRepository.findByLoginId("testuser").orElseThrow();
         assertThat(savedUser.getPasswordHash()).isNotEqualTo("safe-password-123");
         assertThat(passwordEncoder.matches("safe-password-123", savedUser.getPasswordHash())).isTrue();
     }
 
     @Test
-    void signUpRejectsDuplicateEmailIgnoringCase() throws Exception {
-        signUp("User@Example.com", "safe-password-123");
+    void signUpRejectsDuplicateLoginIdIgnoringCase() throws Exception {
+        signUp("TestUser", "safe-password-123");
 
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "email": "user@example.com",
+                                  "loginId": "testuser",
                                   "password": "another-password-123"
                                 }
                                 """))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("DUPLICATE_EMAIL"));
+                .andExpect(jsonPath("$.code").value("DUPLICATE_LOGIN_ID"));
     }
 
     @Test
@@ -80,7 +80,7 @@ class AuthControllerIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "email": "not-an-email",
+                                  "loginId": "1bad",
                                   "password": "short"
                                 }
                                 """))
@@ -88,8 +88,8 @@ class AuthControllerIntegrationTests {
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
     }
 
-    private void signUp(String email, String password) throws Exception {
-        var body = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}";
+    private void signUp(String loginId, String password) throws Exception {
+        var body = "{\"loginId\":\"" + loginId + "\",\"password\":\"" + password + "\"}";
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))

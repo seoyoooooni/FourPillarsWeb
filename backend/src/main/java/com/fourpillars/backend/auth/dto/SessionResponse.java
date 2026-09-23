@@ -3,5 +3,5 @@ package com.fourpillars.backend.auth.dto;
 
 import java.util.UUID;
 
-public record SessionResponse(UUID userId, String email) {
+public record SessionResponse(UUID userId, String loginId) {
 }

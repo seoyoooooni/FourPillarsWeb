@@ -16,6 +16,6 @@ public class SessionController {
 
     @GetMapping("/session")
     public SessionResponse session(@AuthenticationPrincipal Jwt jwt) {
-        return new SessionResponse(UUID.fromString(jwt.getSubject()), jwt.getClaimAsString("email"));
+        return new SessionResponse(UUID.fromString(jwt.getSubject()), jwt.getClaimAsString("loginId"));
     }
 }
