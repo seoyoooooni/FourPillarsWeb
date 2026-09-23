@@ -1,0 +1,22 @@
+version: 1
+applications:
+  - appRoot: frontend
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm use 22
+            - npm ci
+        build:
+          commands:
+            - test -n "$BACKEND_URL"
+            - printf 'BACKEND_URL=%s\n' "$BACKEND_URL" > .env.production
+            - npm run build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - .next/cache/**/*
