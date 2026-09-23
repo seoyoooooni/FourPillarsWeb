@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -12,22 +13,31 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
+import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 @Configuration
 public class JwtKeyConfig {
 
     @Bean
-    KeyPair jwtKeyPair() {
+    KeyPair jwtKeyPair(
+            @Value("${fourpillars.jwt.private-key-base64}") String privateKeyBase64,
+            @Value("${fourpillars.jwt.public-key-base64}") String publicKeyBase64
+    ) {
         try {
-            var generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(2048);
-            return generator.generateKeyPair();
+            var keyFactory = KeyFactory.getInstance("RSA");
+            var privateKey = (RSAPrivateKey) keyFactory.generatePrivate(
+                    new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyBase64)));
+            var publicKey = (RSAPublicKey) keyFactory.generatePublic(
+                    new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyBase64)));
+            return new KeyPair(publicKey, privateKey);
         } catch (Exception exception) {
-            throw new IllegalStateException("JWT RSA 키를 생성하지 못했습니다.", exception);
+            throw new IllegalStateException("JWT RSA 키를 불러오지 못했습니다.", exception);
         }
     }
 
