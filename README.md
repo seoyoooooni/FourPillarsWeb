@@ -321,3 +321,92 @@ BACKEND_URL=http://127.0.0.1:8080
 # 저장소 루트에서
 yarn test:backend
 ```
+
+---
+
+## 8. 배포
+
+프론트엔드, 백엔드, 데이터베이스 모두 AWS 서울 리전(`ap-northeast-2`)에 배포되어 있습니다.
+
+```mermaid
+flowchart LR
+    U[사용자] --> AMP[AWS Amplify<br/>Next.js 프론트엔드]
+    AMP -->|/backend/* 프록시| EB[Elastic Beanstalk<br/>Docker · Spring Boot]
+    EB --> RDS[(RDS<br/>PostgreSQL)]
+
+    GH[GitHub main push] --> GA[GitHub Actions<br/>Docker 이미지 빌드]
+    GA --> ECR[(Amazon ECR)]
+    ECR -->|latest 이미지| EB
+    SSM[(SSM Parameter Store)] -->|DB·JWT 비밀값| EB
+    GH --> AMP
+```
+
+| 구분 | 서비스 | 방식 |
+| --- | --- | --- |
+| Frontend | AWS Amplify | GitHub 연동 자동 빌드·배포 |
+| Backend | Elastic Beanstalk | Docker 컨테이너, 단일 인스턴스 `t3.micro` |
+| Image Registry | Amazon ECR | `fourpillars-backend` 저장소 |
+| Database | Amazon RDS | PostgreSQL, 프라이빗 서브넷 |
+| Secrets | SSM Parameter Store | `/fourpillars/prod/*` |
+| CI | GitHub Actions | OIDC 역할 기반 AWS 인증 |
+
+### 8.1 백엔드 이미지 빌드
+
+`.github/workflows/backend-image.yml`
+
+1. `main` 브랜치에 `backend/`, `deploy/elastic-beanstalk/`, 워크플로 파일 변경이 푸시되면 실행됩니다.
+2. AWS 액세스 키 대신 OIDC로 `GitHubActionsFourPillarsEcrRole` 역할을 위임받습니다.
+3. `backend/Dockerfile`의 멀티 스테이지 빌드로 이미지를 만듭니다.
+   - 1단계: Maven, JDK 21로 jar 빌드
+   - 2단계: JRE 21 이미지에 jar만 복사, 8080 포트로 실행
+4. 커밋 SHA 태그와 `latest` 태그를 붙여 ECR에 푸시합니다.
+
+### 8.2 백엔드 실행
+
+`deploy/elastic-beanstalk/`
+
+| 파일 | 역할 |
+| --- | --- |
+| `Dockerrun.aws.json` | ECR의 `fourpillars-backend:latest` 이미지를 8080 포트로 실행 |
+| `.ebextensions/01-environment.config` | SSM 비밀값 환경변수 주입, 헬스체크 경로, 로그 설정 |
+| `iam-parameter-read-policy.json` | EC2 인스턴스 프로필의 SSM 읽기 권한 |
+
+- 플랫폼: Docker running on 64bit Amazon Linux 2023
+- 헬스체크: `/actuator/health`
+- 앱 시작 시 Flyway 마이그레이션이 자동 적용됩니다.
+- RDS 보안그룹은 Beanstalk EC2 보안그룹의 5432 포트만 허용하며, DB는 외부에 공개하지 않습니다.
+
+운영 환경변수는 모두 SSM에서 주입되며 코드와 배포 번들에는 포함되지 않습니다.
+
+```
+FOURPILLARS_DB_URL
+FOURPILLARS_DB_USERNAME
+FOURPILLARS_DB_PASSWORD
+FOURPILLARS_JWT_PRIVATE_KEY_BASE64
+FOURPILLARS_JWT_PUBLIC_KEY_BASE64
+```
+
+배포 번들 생성:
+
+```bash
+cd deploy/elastic-beanstalk
+zip -r fourpillars-backend-eb.zip Dockerrun.aws.json .ebextensions
+```
+
+ECR에 새 이미지가 올라가도 자동 재배포되지 않으므로, Beanstalk 콘솔에서 환경을 재배포해야 최신 `latest` 이미지가 반영됩니다.
+
+### 8.3 프론트엔드 배포
+
+`amplify.yml`
+
+1. 앱 루트를 `frontend`로 지정합니다.
+2. Node 22로 `npm ci`를 실행합니다.
+3. `BACKEND_URL` 환경변수가 없으면 빌드를 중단하고, 있으면 `.env.production`에 기록합니다.
+4. `npm run build` 후 `.next`를 배포하며, `node_modules`와 `.next/cache`를 캐시합니다.
+
+브라우저는 백엔드를 직접 호출하지 않고 같은 도메인의 `/backend/*`로 요청합니다. `frontend/app/backend/[...path]/route.ts`가 서버에서 `BACKEND_URL`로 요청을 전달하므로 CORS 설정이 필요 없고, 사용자에게는 Amplify의 HTTPS 도메인만 노출됩니다.
+
+```
+브라우저   →  https://{amplify-domain}/backend/api/fortune/today
+Next 서버  →  {BACKEND_URL}/api/fortune/today
+```
