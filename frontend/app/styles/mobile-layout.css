@@ -107,3 +107,18 @@ html {
 .team-member > input {
   font-size: 19px;
 }
+
+.form-shell:has(> .profile-form) {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-shell:has(> .profile-form) > .page-header {
+  flex: none;
+}
+
+.form-shell > .profile-form {
+  flex: none;
+  margin: auto auto;
+  padding-bottom: 0;
+}
