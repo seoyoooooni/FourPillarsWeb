@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://main.d1suzvc6ppiiem.amplifyapp.com/"><b>서비스 바로가기</b></a>
+  <a href="https://main.d1suzvc6ppiiem.amplifyapp.com/"><b>서비스 주소</b></a>
 </p>
 
 ## 1. 프로젝트 소개
