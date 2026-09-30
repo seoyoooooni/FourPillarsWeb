@@ -4,6 +4,10 @@
   <img src="README_images/01-onboarding-welcome.png" width="360" alt="FourPillars 시작 화면" />
 </p>
 
+<p align="center">
+  <a href="https://main.d1suzvc6ppiiem.amplifyapp.com/"><b>서비스 바로가기</b></a>
+</p>
+
 ## 1. 프로젝트 소개
 
 FourPillars는 인하공전 학생들을 대상으로 만든 웹 애플리케이션입니다. 생년월일시를 바탕으로 사주를 계산하고, 그 결과를 오늘의 운세·학과 추천·학업운·팀플 궁합처럼 학생 생활과 가까운 기능으로 제공합니다.
@@ -325,6 +329,8 @@ yarn test:backend
 ---
 
 ## 8. 배포
+
+서비스 주소: https://main.d1suzvc6ppiiem.amplifyapp.com/
 
 프론트엔드, 백엔드, 데이터베이스 모두 AWS 서울 리전(`ap-northeast-2`)에 배포되어 있습니다.
 
